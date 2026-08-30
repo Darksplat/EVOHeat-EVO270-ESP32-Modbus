@@ -27,18 +27,15 @@ Wi-Fi, Arduino OTA and a browser log were added without changing the proven Modb
 
 The working Modbus reader was expanded into a read-only MQTT bridge with Home Assistant Discovery.
 
-## Phase 6 — legacy Aqua Temp entity migration
+## Phase 6 — Aqua Temp entity/register mapping
 
 The old cloud integration's entity model was mapped back onto local HW211 registers/status bits. Fast and slow polling groups were introduced, and T11/T12 were intentionally left unknown because no reliable local mapping was found.
 
+The useful entity/register suffix mapping is retained as documentation, but the public firmware no longer depends on the removed Aqua Temp Wi-Fi module's MAC/device code.
+
 ## Phase 7 — two-unit deployment
 
-The same architecture was applied to:
-
-- Bathroom & Laundry
-- Ensuite & Kitchen
-
-Each unit uses its own device code, MQTT namespace and hostname.
+The same architecture was applied to two EVO270-1 units. Each replacement Waveshare controller now derives its own identity automatically from its ESP32 Wi-Fi MAC, producing a unique MQTT namespace and Home Assistant device identity.
 
 ## Firmware naming during development
 
