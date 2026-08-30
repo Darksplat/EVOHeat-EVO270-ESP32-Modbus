@@ -38,24 +38,29 @@ Flash:
 
 Use the local hostname or IP shown on serial to view the live log.
 
-## 4. Add MQTT
+## 4. Prepare the current firmware secrets
 
-Copy:
+In:
+
+`firmware/current/EVO270_ReadOnly_Reference/`
+
+copy:
 
 `secrets.example.h` → `secrets.h`
 
-Set Wi-Fi, broker and MQTT credentials locally.
+Set Wi-Fi, broker and MQTT credentials locally. Keep `secrets.h` in that same Arduino sketch folder and never commit it.
 
 ## 5. Move to the canonical read-only bridge
 
 Use `firmware/current/EVO270_ReadOnly_Reference/`.
 
-Select the correct device profile in `device_profile.h`.
+Select the friendly/location profile in `device_profile.h` if required. The actual device identity does **not** need to be typed in: the firmware derives it automatically from the Waveshare ESP32 Wi-Fi MAC.
 
 ## 6. Home Assistant validation
 
-Confirm:
+After MQTT Discovery, confirm:
 
+- a fresh EVO270 device appears using the Waveshare-derived identity;
 - device availability is online;
 - T01, T02, T03 and T10 are plausible;
 - R01 matches the displayed set point;
