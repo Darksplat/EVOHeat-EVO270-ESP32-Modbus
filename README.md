@@ -6,6 +6,40 @@ This repository records the field work that took the installation from protocol 
 
 > **Status:** field-tested read-only monitoring. No Modbus write function is included in the current public firmware.
 
+## Hardware used / where to get it
+
+The build was developed around the following hardware:
+
+| Part | Source | Notes |
+|---|---|---|
+| Waveshare ESP32-S3-RS485-CAN | [Waveshare product page](https://www.waveshare.com/esp32-s3-rs485-can.htm) | Exact board used for the working installation. It accepts 7–36 V DC at the screw-terminal input and has isolated RS485 onboard. |
+| EVO270 replacement connector housing + crimp pins | [Tempero Systems – JST XH series crimp-style 2.5 mm](https://temperosystems.com.au/products/jst-xh-series-crimp-style-2-5mm/) | Select the **5-way housing** and matching **2.5 mm crimp pins**. This is the connector source used for the replacement harness. |
+| EVO270-1 | [EvoHeat EVO270-1 product page](https://evoheat.com.au/hot-water-heat-pump/evo-270/) | Manufacturer reference/manual source. |
+
+More detail is in [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) and [`docs/HARDWARE_AND_WIRING.md`](docs/HARDWARE_AND_WIRING.md).
+
+### Important connector warning
+
+Buying the correct connector **does not mean the pins will already be in the correct electrical order**.
+
+If you want a neat plug-in replacement harness, check every cavity against the original EVO270 Wi-Fi/RS485 lead and **extract the crimp terminals from the new housing and re-insert them in the correct positions before plugging it into the heat pump**. A small pick or fine terminal-release tool can lift the plastic retaining tang so the crimp terminal slides back out of the housing.
+
+For this installation the functions are:
+
+| EVO270 harness wire | Function | Waveshare connection |
+|---|---|---|
+| Red | +12 V DC | DC+ |
+| Black | Ground | DC- |
+| White | RS485 A | A+ |
+| Yellow | RS485 B | B- |
+| Orange | Shield / earth | Not connected to the Waveshare in this installation |
+
+**Do not trust the colour order or pin order of a premade connector lead. Verify function and continuity before applying power.**
+
+If you do not want to de-pin and rearrange a replacement connector, the other practical method is to **snip the lead and solder the required wires to the EVO270 harness**, matching the functions above. Insulate each soldered joint individually with heat-shrink and then protect the completed harness mechanically.
+
+The Waveshare board can be powered from the EVO270's 12 V supply through its DC screw terminals; do **not** put 12 V directly onto a bare ESP32 5 V/3.3 V pin.
+
 ## What is proven on this installation
 
 | Item | Value |
@@ -60,6 +94,24 @@ Two installations used during development:
 
 Climate/select command topics are intentionally read-only in the public implementation: commands are rejected/logged and actual state is republished.
 
+## For first-time builders
+
+The code is only half of this project. A beginner should be able to identify the correct plug and wire the board before ever opening the Arduino IDE.
+
+The photo walkthrough will therefore show, in order:
+
+1. the original EVO270 Wi-Fi/RS485 connector;
+2. the replacement 5-way connector and loose crimp terminals;
+3. how a terminal is released from the connector housing;
+4. the corrected connector pin/wire arrangement;
+5. the Waveshare DC+/DC-/A+/B- terminals;
+6. the completed harness connected to the Waveshare;
+7. the Waveshare mounted inside the EVO270 enclosure;
+8. the Arduino browser monitor showing a valid Modbus response; and
+9. the final Home Assistant device/entities.
+
+See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the hardware/photo checklist.
+
 ## Repository layout
 
 - `firmware/current/` – canonical V2.1.2-style public-safe reference implementation
@@ -73,13 +125,16 @@ Climate/select command topics are intentionally read-only in the public implemen
 
 ## Quick start
 
-1. Wire the ESP32 to the HW211 RS485/DTU interface. Treat **terminal function** as authoritative; wire colours below are only what was observed on one installation.
-2. Start with `firmware/commissioning/EVO270_Laundry_Bathroom_Arduino_OTA.ino`.
-3. Confirm register 2019 returns a sensible ambient temperature.
-4. Copy `secrets.example.h` to `secrets.h` and fill in Wi-Fi/MQTT credentials.
-5. Move to the canonical read-only firmware.
-6. Confirm Home Assistant MQTT Discovery entities are created.
-7. Leave writes disabled until every target register, range and side effect is independently verified.
+1. Obtain the Waveshare board and either the replacement connector parts or prepare to splice the original lead.
+2. If using the replacement housing, **de-pin/re-pin it to match the EVO270 wiring before connecting it**.
+3. Verify Red = +12 V, Black = GND, White = RS485 A and Yellow = RS485 B by connector position/function. Do not rely solely on colours from an aftermarket lead.
+4. Wire the ESP32 to the HW211 RS485/DTU interface. Treat **terminal function** as authoritative.
+5. Start with `firmware/commissioning/EVO270_Laundry_Bathroom_Arduino_OTA.ino`.
+6. Confirm register 2019 returns a sensible ambient temperature.
+7. Copy `secrets.example.h` to `secrets.h` and fill in Wi-Fi/MQTT credentials.
+8. Move to the canonical read-only firmware.
+9. Confirm Home Assistant MQTT Discovery entities are created.
+10. Leave writes disabled until every target register, range and side effect is independently verified.
 
 ## Observed harness colours
 
@@ -105,5 +160,7 @@ See [`ACKNOWLEDGEMENTS.md`](ACKNOWLEDGEMENTS.md) and [`NOTICE.md`](NOTICE.md).
 ## Safety / scope
 
 This is an independent community project and is not affiliated with or endorsed by EvoHeat, Aqua Temp, Waveshare or Home Assistant.
+
+Disconnect/isolate mains power before opening the EVO270 enclosure. The low-voltage Wi-Fi/RS485 harness discussed here is inside equipment that also contains mains-voltage wiring.
 
 Heat-pump hot-water controllers can have compressor protection, disinfection, anti-freeze and safety-related parameters. This repository intentionally defaults to **read-only** operation. If write support is added later it should be narrowly allow-listed and range-checked.
