@@ -13,7 +13,7 @@ The build was developed around the following hardware:
 | Part | Source | Notes |
 |---|---|---|
 | Waveshare ESP32-S3-RS485-CAN | [Waveshare product page](https://www.waveshare.com/esp32-s3-rs485-can.htm) | Exact board used for the working installation. It accepts 7–36 V DC at the screw-terminal input and has isolated RS485 onboard. |
-| EVO270 replacement connector housing + crimp pins | [Tempero Systems – JST XH series crimp-style 2.5 mm](https://temperosystems.com.au/products/jst-xh-series-crimp-style-2-5mm/) | Select the **5-way housing** and matching **2.5 mm crimp pins**. This is the connector source used for the replacement harness. |
+| EVO270 replacement connector / pigtail | [Tempero Systems – 5-pin male/female JST-SM locking pigtail](https://temperosystems.com.au/products/5pin-male-female-jst-sm-locking-pigtail/) | This is the exact connector/pigtail used for the replacement EVO270 harness. The pins/wires must be rearranged to the correct EVO270 mapping before use. |
 | EVO270-1 | [EvoHeat EVO270-1 product page](https://evoheat.com.au/hot-water-heat-pump/evo-270/) | Manufacturer reference/manual source. |
 
 More detail is in [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) and [`docs/HARDWARE_AND_WIRING.md`](docs/HARDWARE_AND_WIRING.md).
@@ -21,6 +21,8 @@ More detail is in [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE
 ### Important connector warning
 
 Buying the correct connector **does not mean the pins will already be in the correct electrical order**.
+
+The Tempero 5-pin JST-SM locking pigtail physically gives you the connector you need, but the supplied wire/pin order should **not** be assumed to match the EVO270.
 
 If you want a neat plug-in replacement harness, check every cavity against the original EVO270 Wi-Fi/RS485 lead and **extract the crimp terminals from the new housing and re-insert them in the correct positions before plugging it into the heat pump**. A small pick or fine terminal-release tool can lift the plastic retaining tang so the crimp terminal slides back out of the housing.
 
@@ -34,9 +36,9 @@ For this installation the functions are:
 | Yellow | RS485 B | B- |
 | Orange | Shield / earth | Not connected to the Waveshare in this installation |
 
-**Do not trust the colour order or pin order of a premade connector lead. Verify function and continuity before applying power.**
+**Do not trust the colour order or pin order of the Tempero pigtail as supplied. Verify function, cavity position and continuity before applying power.**
 
-If you do not want to de-pin and rearrange a replacement connector, the other practical method is to **snip the lead and solder the required wires to the EVO270 harness**, matching the functions above. Insulate each soldered joint individually with heat-shrink and then protect the completed harness mechanically.
+If you do not want to de-pin and rearrange the JST-SM pigtail, the other practical method is to **snip the lead and solder the required wires to the EVO270 harness**, matching the functions above. Insulate each soldered joint individually with heat-shrink and then protect the completed harness mechanically.
 
 The Waveshare board can be powered from the EVO270's 12 V supply through its DC screw terminals; do **not** put 12 V directly onto a bare ESP32 5 V/3.3 V pin.
 
@@ -101,8 +103,8 @@ The code is only half of this project. A beginner should be able to identify the
 The photo walkthrough will therefore show, in order:
 
 1. the original EVO270 Wi-Fi/RS485 connector;
-2. the replacement 5-way connector and loose crimp terminals;
-3. how a terminal is released from the connector housing;
+2. the Tempero 5-pin JST-SM locking pigtail;
+3. how a terminal is released from the JST-SM housing;
 4. the corrected connector pin/wire arrangement;
 5. the Waveshare DC+/DC-/A+/B- terminals;
 6. the completed harness connected to the Waveshare;
@@ -125,9 +127,9 @@ See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the h
 
 ## Quick start
 
-1. Obtain the Waveshare board and either the replacement connector parts or prepare to splice the original lead.
-2. If using the replacement housing, **de-pin/re-pin it to match the EVO270 wiring before connecting it**.
-3. Verify Red = +12 V, Black = GND, White = RS485 A and Yellow = RS485 B by connector position/function. Do not rely solely on colours from an aftermarket lead.
+1. Obtain the Waveshare board and the Tempero **5-pin male/female JST-SM locking pigtail**, or prepare to splice the original lead.
+2. If using the JST-SM pigtail, **de-pin/re-pin it to match the EVO270 wiring before connecting it**.
+3. Verify Red = +12 V, Black = GND, White = RS485 A and Yellow = RS485 B by connector position/function. Do not rely solely on colours from the replacement pigtail.
 4. Wire the ESP32 to the HW211 RS485/DTU interface. Treat **terminal function** as authoritative.
 5. Start with `firmware/commissioning/EVO270_Laundry_Bathroom_Arduino_OTA.ino`.
 6. Confirm register 2019 returns a sensible ambient temperature.
