@@ -1,0 +1,11 @@
+register,meaning,access_in_this_project,notes
+1011,Power,read-only,0=off 1=on
+1013,Actual operation mode,read-only,Observed mode values 0/2/3/4/7
+2019,Ambient temperature T01,read-only,Known-good commissioning register
+2020,Bottom tank temperature T02,read-only,TEMP1
+2021,Top tank temperature T03,read-only,TEMP1
+2025,APP/display temperature T10,read-only,Used for HA climate current temperature
+2050,Status0 bitfield,read-only,Outputs and switch states
+2051,Status1 bitfield,read-only,Shutdown/DTU/defrost/high-temp flags
+2085,Fault0 bitfield,read-only,Non-zero treated as fault active
+1104,Target temperature R01,read-only,Used for HA climate target temperature

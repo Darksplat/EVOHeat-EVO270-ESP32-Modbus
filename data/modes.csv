@@ -1,0 +1,6 @@
+raw,display,home_assistant_hvac_mode
+0,Intelligent,heat
+2,Economic,heat
+3,Hybrid,heat
+4,High Demand,heat
+7,Vacation,off

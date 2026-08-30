@@ -1,0 +1,84 @@
+index,Legacy entity,Source,HW211 code,Decode,Poll,Old snapshot,Status,Notes
+0,sensor.34eae7b41fea_usage_of_out_05_01,Register 1020,/01,RAW,slow,0.0,mapped,
+1,sensor.34eae7b41fea_usage_of_out_06_02,Register 1021,/02,RAW,slow,0.0,mapped,
+2,sensor.34eae7b41fea_defrosting_startup_temp_d01,Register 1034,D01,TEMP1,slow,-3.0,mapped,
+3,sensor.34eae7b41fea_defrosting_shutdown_temp_d02,Register 1035,D02,TEMP1,slow,13.0,mapped,
+4,sensor.34eae7b41fea_duration_of_defrosting_d03,Register 1036,D03,RAW,slow,29.0,mapped,
+5,sensor.34eae7b41fea_longest_duration_of_defrosting_d04,Register 1037,D04,DIGI7,slow,8.0,mapped,HW211 DIGI7 = raw × 0.5
+6,sensor.34eae7b41fea_shortest_duration_of_defrosting_d05,Register 1038,D05,DIGI7,slow,3.0,mapped,HW211 DIGI7 = raw × 0.5
+7,sensor.34eae7b41fea_defrosting_way_d06,Register 1039,D06,RAW,slow,0.0,mapped,
+8,sensor.34eae7b41fea_intelligent_defrosting_judgement_d07,Register 1040,D07,TEMP1,slow,4.0,mapped,
+9,sensor.34eae7b41fea_eev_adjustment_mode_e01,Register 1055,E01,RAW,slow,1.0,mapped,
+10,sensor.34eae7b41fea_target_degree_of_supreheat_e02,Register 1056,E02,TEMP1,slow,5.0,mapped,
+11,sensor.34eae7b41fea_original_position_of_eev_e03,Register 1057,E03,DIGI2,slow,240.0,mapped,HW211 DIGI2 = raw × 10
+12,sensor.34eae7b41fea_minimal_opening_position_of_eev_e04,Register 1058,E04,DIGI2,slow,80.0,mapped,HW211 DIGI2 = raw × 10
+13,sensor.34eae7b41fea_position_of_eev_for_defrosting_e05,Register 1059,E05,DIGI2,slow,480.0,mapped,HW211 DIGI2 = raw × 10
+14,sensor.34eae7b41fea_disinfection_target_temp_g01,Register 1046,G01,TEMP1,slow,70.0,mapped,
+15,sensor.34eae7b41fea_duration_of_disinfection_g02,Register 1047,G02,RAW,slow,30.0,mapped,
+16,sensor.34eae7b41fea_startup_point_of_disinfection_g03,Register 1048,G03,RAW,slow,12.0,mapped,
+17,sensor.34eae7b41fea_circle_of_disinfection_g04,Register 1049,G04,RAW,slow,7.0,mapped,
+18,sensor.34eae7b41fea_remenber_the_status_of_device_when_power_down_h01,Register 1067,H01,RAW,slow,0.0,mapped,Legacy entity ID spelling preserved
+19,sensor.34eae7b41fea_heating_source_h03,Register 1069,H03,RAW,slow,0.0,mapped,
+20,sensor.34eae7b41fea_temperature_unit_h07,Register 1073,H07,RAW,slow,0.0,mapped,"0=Celsius, 1=Fahrenheit"
+21,sensor.34eae7b41fea_device_address_h30,Register 1076,H30,RAW,slow,1.0,mapped,This is controller address; DTU/Wi-Fi Modbus endpoint remains slave 99
+22,sensor.34eae7b41fea_intelligent_control_mode_h31,Register 1077,H31,RAW,slow,1.0,mapped,"0=centralized control, 1=DTU/Wi-Fi"
+23,sensor.34eae7b41fea_circle_of_submitting_data_to_cloud_h32,Register 1066,H32,RAW,slow,5.0,mapped,
+24,sensor.34eae7b41fea_adjustable_range_of_target_temperature_h98,Register 1074,H98,RAW,slow,2.0,mapped,Legacy Aqua Temp label preserved; HW211 protocol calls H98 model mode parameter
+25,sensor.34eae7b41fea_compensate_to_the_shown_temp_h99,Register 1075,H99,RAW,slow,0.0,mapped,
+26,sensor.34eae7b41fea_the_sensor_to_control_solar_water_pump_n01,Register 1080,N01,RAW,slow,0.0,mapped,
+27,sensor.34eae7b41fea_longest_running_time_of_solar_water_pump_n02,Register 1081,N02,RAW,slow,15.0,mapped,
+28,sensor.34eae7b41fea_temp_hysteresis_of_solar_water_pump_n03,Register 1082,N03,TEMP1,slow,5.0,mapped,
+29,sensor.34eae7b41fea_activate_the_nighttime_temp_decreases_mode_n04,Register 1083,N04,RAW,slow,0.0,mapped,
+30,sensor.34eae7b41fea_startup_point_of_the_nighttime_temp_decreases_mode_n05,Register 1084,N05,RAW,slow,0.0,mapped,
+31,sensor.34eae7b41fea_shutdown_point_of_the_nighttime_temp_decreases_mode_n06,Register 1085,N06,RAW,slow,6.0,mapped,
+32,sensor.34eae7b41fea_startup_temp_of_decreasing_solar_water_temp_n07,Register 1086,N07,TEMP1,slow,70.0,mapped,
+33,sensor.34eae7b41fea_temp_hysteresis_of_stopping_decreasing_solar_water_temp_n08,Register 1087,N08,TEMP1,slow,10.0,mapped,
+34,sensor.34eae7b41fea_solar_water_releasing_temp_n09,Register 1088,N09,TEMP1,slow,68.0,mapped,
+35,sensor.34eae7b41fea_shutdown_temp_of_solar_water_pump_n10,Register 1089,N10,TEMP1,slow,70.0,mapped,
+36,sensor.34eae7b41fea_working_mode_of_solar_water_pump_n11,Register 1090,N11,RAW,slow,0.0,mapped,
+37,sensor.34eae7b41fea_target_temp_r01,Register 1104,R01,TEMP1,fast,55.0,mapped,Also supplies climate target temperature
+38,sensor.34eae7b41fea_hysteresis_of_heat_pump_startup_bottom_sensor_r03,Register 1106,R03,TEMP1,slow,5.0,mapped,
+39,sensor.34eae7b41fea_enable_r05_as_setpoint_of_booster_r04,Register 1107,R04,RAW,slow,0.0,mapped,
+40,sensor.34eae7b41fea_setpoint_of_booster_r05,Register 1108,R05,TEMP1,slow,55.0,mapped,
+41,sensor.34eae7b41fea_booster_startup_delay_r06,Register 1109,R06,DIGI4,slow,200.0,mapped,HW211 DIGI4 = raw × 5
+42,sensor.34eae7b41fea_booster_replaces_heat_pump_r07,Register 1110,R07,RAW,slow,1.0,mapped,
+43,sensor.34eae7b41fea_setpoint_of_ambient_temp_to_activate_booster_to_replace_heat_pump_r08,Register 1111,R08,TEMP1,slow,-5.0,mapped,
+44,sensor.34eae7b41fea_setpoint_of_ambient_temp_to_activate_booster_without_delay_r09,Register 1112,R09,TEMP1,slow,5.0,mapped,
+45,sensor.34eae7b41fea_setpoint_of_ambient_temp_to_activate_booster_with_delay_r10,Register 1113,R10,TEMP1,slow,25.0,mapped,
+46,sensor.34eae7b41fea_ambient_temp_of_shutting_down_compressor_compulsively_r12,Register 1115,R12,TEMP1,slow,-15.0,mapped,
+47,sensor.34eae7b41fea_the_target_temp_of_second_heating_source_r14,Register 1117,R14,TEMP1,slow,45.0,mapped,
+48,sensor.34eae7b41fea_maximal_ambient_temp_of_working_compressor_r15,Register 1118,R15,TEMP1,slow,78.0,mapped,
+49,sensor.34eae7b41fea_enable_top_sensor_to_control_compressor_r17,Register 1120,R17,RAW,slow,0.0,mapped,
+50,sensor.34eae7b41fea_hysteresis_of_heat_pump_startup_top_sensor_r18,Register 1121,R18,TEMP1,slow,1.0,mapped,
+51,sensor.34eae7b41fea_setpoint_1_of_ambient_temp_to_stop_compressor_r19,Register 1122,R19,TEMP1,slow,65.0,mapped,
+52,sensor.34eae7b41fea_setpoint_2_of_ambient_temp_to_stop_compressor_r20,Register 1123,R20,TEMP1,slow,65.0,mapped,
+53,sensor.34eae7b41fea_eev_current_position_o07,Register 2060,O07,RAW,fast,480.0,mapped,
+54,sensor.34eae7b41fea_accumulative_running_time_of_compressor_o08,Register 2061,O08,RAW,fast,15.0,mapped,
+55,sensor.34eae7b41fea_accumulative_running_time_of_booster_o09,Register 2062,O09,RAW,fast,2.0,mapped,
+56,sensor.34eae7b41fea_ambient_temperature_t01,Register 2019,T01,TEMP1,fast,20.5,mapped,Known-good local Modbus validation register
+57,sensor.34eae7b41fea_bottom_temperature_t02,Register 2020,T02,TEMP1,fast,53.0,mapped,
+58,sensor.34eae7b41fea_top_temperature_t03,Register 2021,T03,TEMP1,fast,58.5,mapped,
+59,sensor.34eae7b41fea_coil_temperature_t04,Register 2022,T04,TEMP1,fast,15.0,mapped,
+60,sensor.34eae7b41fea_suction_temperature_t05,Register 2023,T05,TEMP1,fast,25.5,mapped,
+61,sensor.34eae7b41fea_solar_temperature_t06,Register 2024,T06,TEMP1,fast,77.0,mapped,
+62,sensor.34eae7b41fea_temperature_value_shown_on_app_display_t10,Register 2025,T10,TEMP1,fast,58.5,mapped,Also supplies climate current temperature
+63,sensor.34eae7b41fea_compressor_o01,Register 2050 bit 8,O01,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+64,sensor.34eae7b41fea_electrical_heater_o02,Register 2050 bit 9,O02,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+65,sensor.34eae7b41fea_4_way_valve_o03,Register 2050 bit 10,O03,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+66,sensor.34eae7b41fea_fan_high_speed_o04,Register 2050 bit 11,O04,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+67,sensor.34eae7b41fea_fan_low_speed_o05,Register 2050 bit 12,O05,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+68,sensor.34eae7b41fea_reserve_solar_pump_solar_valve_pump_o06,Register 2050 bit 13,O06,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+69,sensor.34eae7b41fea_3v_de_o10,Register 2050 bit 14,O10,bit → 0.0/1.0,fast,unknown,mapped from status bit,Legacy Aqua Temp numbering preserved; HW211 protocol calls this status output O12 / electric-anode 3V_DE
+70,sensor.34eae7b41fea_mv_de_o11,Register 2050 bit 15,O11,bit → 0.0/1.0,fast,unknown,mapped from status bit,Legacy Aqua Temp numbering preserved; HW211 protocol calls this status output O13 / electric-anode MV_DE
+71,sensor.34eae7b41fea_shutdown_o12,Register 2051 bit 0,O12,bit → 0.0/1.0,fast,unknown,mapped from status bit,"Legacy Aqua Temp O12 maps to HW211 Status1 bit0, protocol label O14 shutdown"
+72,sensor.34eae7b41fea_dtu_wifishi_fou_shang_xian_o13,Register 2051 bit 1,O13,bit → 0.0/1.0,fast,unknown,mapped from status bit,"Legacy Aqua Temp O13 maps to HW211 Status1 bit1, protocol label O15 DTU/Wi-Fi online"
+73,sensor.34eae7b41fea_chu_shuang_defrost_o14,Register 2051 bit 2,O14,bit → 0.0/1.0,fast,unknown,mapped from status bit,"Legacy Aqua Temp O14 maps to HW211 Status1 bit2, protocol label O16 Defrost"
+74,sensor.34eae7b41fea_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15,Register 2051 bit 3,O15,bit → 0.0/1.0,fast,unknown,mapped from status bit,"Legacy Aqua Temp O15 maps to HW211 Status1 bit3, protocol label O17 hot-water function"
+75,sensor.34eae7b41fea_remote_on_off_switch_s01,Register 2050 bit 0,S01,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+76,sensor.34eae7b41fea_over_heat_protection_switch_s02,Register 2050 bit 1,S02,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+77,sensor.34eae7b41fea_low_pressure_switch_s03,Register 2050 bit 2,S03,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+78,sensor.34eae7b41fea_high_pressure_switch_s04,Register 2050 bit 3,S04,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+79,sensor.34eae7b41fea_accelerate_the_running_time_of_heater_s05,Register 2050 bit 4,S05,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+80,sensor.34eae7b41fea_second_heating_source_s06,Register 2050 bit 5,S06,bit → 0.0/1.0,fast,unknown,mapped from status bit,
+81,sensor.34eae7b41fea_jin_ru_can_shu_chao_fan_wei_bao_hu_ci_shu_t11,No reliable local mapping,T11,None → unknown,,unknown,legacy placeholder,Aqua Temp cloud data was null/unknown; no reliable local DTU/Wi-Fi register mapping found
+82,sensor.34eae7b41fea_ji_yi_xin_pian_eepromcun_chu_ci_shu_t12,No reliable local mapping,T12,None → unknown,,unknown,legacy placeholder,Aqua Temp cloud data was null/unknown; no reliable local DTU/Wi-Fi register mapping found

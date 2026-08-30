@@ -1,0 +1,19 @@
+register,bit,legacy_code,legacy_name
+2050,0,S01,Remote ON/OFF switch
+2050,1,S02,Over heat protection switch
+2050,2,S03,Low pressure switch
+2050,3,S04,High pressure switch
+2050,4,S05,Accelerate the running time of heater
+2050,5,S06,Second heating source
+2050,8,O01,Compressor
+2050,9,O02,Electrical heater
+2050,10,O03,4-way valve
+2050,11,O04,Fan high speed
+2050,12,O05,Fan low speed
+2050,13,O06,Reserve/solar pump/solar valve pump
+2050,14,O10,3V_DE
+2050,15,O11,MV_DE
+2051,0,O12,Shutdown
+2051,1,O13,DTU/Wi-Fi online
+2051,2,O14,Defrost
+2051,3,O15,High-temperature hot-water stage

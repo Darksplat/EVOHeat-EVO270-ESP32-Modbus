@@ -1,0 +1,20 @@
+# Credentials
+secrets.h
+**/secrets.h
+*.local.h
+
+# Arduino build output
+build/
+*.bin
+*.elf
+*.map
+*.hex
+
+# Platform/editor noise
+.DS_Store
+.vscode/
+.idea/
+
+# Logs captured locally
+*.log
+logs/

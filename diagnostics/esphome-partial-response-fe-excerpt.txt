@@ -1,0 +1,20 @@
+Sanitized excerpt from the failed ESPHome commissioning run.
+
+ESPHome: 2026.8.1
+Target: Waveshare ESP32-S3-RS485-CAN
+EVO270/HW211: 9600 8N1, slave 99
+
+[D][uart_debug]: [EVO270 RS485] <<< FE
+[W][modbus]: Clearing buffer of 1 bytes - timeout after partial response
+[D][uart_debug]: [EVO270 RS485] <<< FE
+[W][modbus]: Clearing buffer of 1 bytes - timeout after partial response
+[D][uart_debug]: [EVO270 RS485] <<< FE
+[W][modbus]: Clearing buffer of 1 bytes - timeout after partial response
+
+Contrast with the direct Arduino commissioning test:
+
+TX: 63 03 07 E3 00 01 7C CA
+RX: 63 03 02 00 61 80 64
+
+This file intentionally keeps only the technically useful pattern rather than
+publishing the complete private installation log.
