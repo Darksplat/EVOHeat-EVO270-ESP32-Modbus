@@ -123,7 +123,7 @@ See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the h
 - `docs/` – wiring, protocol, MQTT, commissioning, ESPHome failure analysis and project history
 - `diagnostics/` – sanitized failure/commissioning excerpts
 - `references/` – upstream projects and licensing notes
-- `secrets.example.h` – example credentials file; copy locally to `secrets.h`
+- `firmware/current/EVO270_ReadOnly_Reference/secrets.example.h` – example credentials file for the reference firmware; copy it **in that same sketch folder** to `secrets.h`
 
 ## Quick start
 
@@ -133,7 +133,7 @@ See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the h
 4. Wire the ESP32 to the HW211 RS485/DTU interface. Treat **terminal function** as authoritative.
 5. Start with `firmware/commissioning/EVO270_Laundry_Bathroom_Arduino_OTA.ino`.
 6. Confirm register 2019 returns a sensible ambient temperature.
-7. Copy `secrets.example.h` to `secrets.h` and fill in Wi-Fi/MQTT credentials.
+7. In `firmware/current/EVO270_ReadOnly_Reference/`, copy `secrets.example.h` to `secrets.h` and fill in Wi-Fi/MQTT credentials. The `secrets.h` file must stay in the **same Arduino sketch folder** as `EVO270_ReadOnly_Reference.ino`.
 8. Move to the canonical read-only firmware.
 9. Confirm Home Assistant MQTT Discovery entities are created.
 10. Leave writes disabled until every target register, range and side effect is independently verified.
