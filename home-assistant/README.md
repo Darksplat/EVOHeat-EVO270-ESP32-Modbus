@@ -1,23 +1,20 @@
 # Home Assistant
 
-This folder contains the Home Assistant dashboard used with the EVO270 local Modbus/MQTT project.
+This folder contains the Home Assistant dashboard template for the EVO270 local Modbus/MQTT project.
 
 ## Dashboard
 
-The current dashboard as used on the development installation is:
+Use:
 
 - [`dashboard/evo270-hot-water-dashboard.yaml`](dashboard/evo270-hot-water-dashboard.yaml)
 
-It contains two EVO270-1 units:
+The public dashboard is a **fresh-install template**. It does not need the MAC/device codes of the removed Aqua Temp wireless modules.
 
-- Bathroom & Laundry — device code `34eae7b41fea`
-- Ensuite & Kitchen — device code `34eae79f4bce`
-
-The dashboard is preserved as actually used rather than silently replacing entity IDs with generic placeholders.
+The firmware automatically derives each new device identity from the replacement **Waveshare ESP32 Wi-Fi MAC**. After MQTT Discovery creates the devices in Home Assistant, replace the dashboard placeholders with the IDs Home Assistant created for your two units.
 
 ## Frontend requirements
 
-The main HWS cards use:
+The dashboard uses:
 
 1. **Mushroom Cards** — required for `custom:mushroom-template-card`.
 2. **card-mod** — required for the `card_mod:` styling blocks.
@@ -27,80 +24,56 @@ Mushroom Cards and card-mod are normally installed through HACS Frontend.
 
 No custom card source code is copied into this repository; install the maintained upstream packages in Home Assistant/HACS.
 
-## MQTT/read-only entities used
+## Device IDs
 
-The main Bathroom & Laundry section expects these core entities:
+The public firmware uses the Waveshare Wi-Fi MAC with the colons removed and lower-cased.
 
-```text
-climate.34eae7b41fea
-binary_sensor.34eae7b41fea_api_status
-binary_sensor.34eae7b41fea_fault
-sensor.34eae7b41fea_top_temperature_t03
-sensor.34eae7b41fea_bottom_temperature_t02
-sensor.34eae7b41fea_ambient_temperature_t01
-```
-
-The main Ensuite & Kitchen section expects:
+Example only:
 
 ```text
-climate.34eae79f4bce
-binary_sensor.34eae79f4bce_api_status
-binary_sensor.34eae79f4bce_fault
-sensor.34eae79f4bce_top_temperature_t03
-sensor.34eae79f4bce_bottom_temperature_t02
-sensor.34eae79f4bce_ambient_temperature_t01
+Waveshare MAC: AA:BB:CC:DD:EE:FF
+Device ID:     aabbccddeeff
 ```
 
-The firmware deliberately preserves many of the original Aqua Temp-style entity identifiers through MQTT Discovery to reduce dashboard migration work.
+The dashboard uses these placeholders:
+
+```text
+replace_with_unit1_id
+replace_with_unit2_id
+```
+
+After flashing both Waveshare controllers and allowing MQTT Discovery to run, use Home Assistant **Developer Tools -> States** or the device/entity pages to identify each unit's actual entity IDs and replace the placeholders.
 
 ## Operating-mode Select entities
 
-The supplied dashboard currently references the entity IDs created on the development Home Assistant instance:
+The two operating-mode cards use deliberately generic placeholders:
 
 ```text
-select.backyard_evo270_bathroom_laundry_34eae7b41fea_34eae7b41fea_operating_mode
-select.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_34eae79f4bce_operating_mode
+select.replace_with_unit1_operating_mode
+select.replace_with_unit2_operating_mode
 ```
 
-Home Assistant entity IDs can vary depending on device naming and prior entity history. A new installation may need to replace these two IDs with the operating-mode Select entities created on that Home Assistant system.
+Home Assistant Select entity IDs can vary depending on firmware/discovery naming and the Entity Registry. Replace these with the actual operating-mode Select entities on your system.
 
-The public firmware is currently **read-only**. Any command sent to a read-only climate/select topic must not be treated as proof that the HWS setting was changed.
+The public firmware remains **read-only**. A displayed or selectable mode must not be treated as proof that the HWS controller setting was changed unless write support is deliberately implemented and tested later.
 
-## Important: Controller Clocks section is legacy Aqua Temp
+## Controller Clocks
 
-The bottom **Controller Clocks** section of the current dashboard is not provided by the Arduino + MQTT read-only firmware.
+The old dashboard contained a **Controller Clocks** section using the previous Aqua Temp integration's `aqua_temp.sync_clock` service and `unit_time` sensors.
 
-It references legacy Aqua Temp integration entities and the service:
-
-```text
-aqua_temp.sync_clock
-```
-
-and these installation-specific unit-time sensors:
-
-```text
-sensor.backyard_evo270_bathroom_laundry_34eae7b41fea_evo270_bathroom_laundry_unit_time
-sensor.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_evo270_ensuite_kitchen_unit_time
-```
-
-If the old Aqua Temp custom integration is no longer installed, remove the entire **Controller Clocks** section from the dashboard. It is retained in the supplied YAML because this file records the real dashboard from the development installation.
-
-A future local implementation could expose/controller-sync HW211 clock registers directly, but that is outside the current read-only firmware scope.
+That section is not part of the public MQTT-only dashboard. It is not required for local Modbus monitoring and is not provided by the current read-only Arduino firmware.
 
 ## Installing the dashboard
 
-For a YAML dashboard, copy the contents of `dashboard/evo270-hot-water-dashboard.yaml` into the appropriate Home Assistant dashboard/raw configuration.
-
-Before saving it on another system:
-
-1. Install Mushroom Cards and card-mod.
-2. Confirm the EVO270 MQTT Discovery entities exist.
-3. Replace the two device codes if your units use different legacy IDs.
-4. Replace the operating-mode Select entity IDs with the IDs on your system if required.
-5. Remove the Controller Clocks section unless the legacy Aqua Temp integration and its `aqua_temp.sync_clock` service are present.
+1. Flash the local Arduino/MQTT firmware onto each Waveshare controller.
+2. Confirm both devices appear in Home Assistant through MQTT Discovery.
+3. Install Mushroom Cards and card-mod.
+4. Copy the contents of `dashboard/evo270-hot-water-dashboard.yaml` into a Home Assistant dashboard/raw configuration.
+5. Replace `replace_with_unit1_id` and `replace_with_unit2_id` with the actual Waveshare-derived IDs/entities on your system.
+6. Replace the two operating-mode Select placeholders if required.
 
 ## Custom components
 
-The current Arduino + MQTT implementation does **not** require an ESPHome custom component or a Home Assistant custom integration for normal monitoring.
+The Arduino + MQTT implementation does **not** require an ESPHome custom component or a Home Assistant custom integration for normal monitoring.
 
 The historical ESPHome/HW211 work is documented separately under [`../esphome/`](../esphome/). That path is useful for protocol research and experimentation, but it is not a dependency of the working Arduino + MQTT firmware.
