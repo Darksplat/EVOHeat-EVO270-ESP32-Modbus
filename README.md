@@ -96,6 +96,16 @@ Two installations used during development:
 
 Climate/select command topics are intentionally read-only in the public implementation: commands are rejected/logged and actual state is republished.
 
+### Dashboard
+
+The actual Home Assistant dashboard used during development is included at:
+
+[`home-assistant/dashboard/evo270-hot-water-dashboard.yaml`](home-assistant/dashboard/evo270-hot-water-dashboard.yaml)
+
+It uses **Mushroom Cards** and **card-mod** for the frontend presentation. See [`home-assistant/README.md`](home-assistant/README.md) for installation notes, entity-ID guidance and the legacy Controller Clocks caveat.
+
+The bottom **Controller Clocks** section of that dashboard still uses the earlier Aqua Temp `aqua_temp.sync_clock` service and legacy unit-time sensors. Those clock cards are not a dependency of the Arduino + MQTT monitoring firmware and should be removed on a clean MQTT-only installation.
+
 ## For first-time builders
 
 The code is only half of this project. A beginner should be able to identify the correct plug and wire the board before ever opening the Arduino IDE.
@@ -119,6 +129,7 @@ See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the h
 - `firmware/current/` – canonical V2.1.2-style public-safe reference implementation
 - `firmware/commissioning/` – known-good single-register OTA and browser-monitor sketches
 - `firmware/testbench/` – RS485 master/slave bench sketches
+- `home-assistant/` – real dashboard YAML plus frontend/dependency and migration notes
 - `data/` – register, status-bit, mode and legacy-entity mapping tables
 - `docs/` – wiring, protocol, MQTT, commissioning, ESPHome failure analysis and project history
 - `diagnostics/` – sanitized failure/commissioning excerpts
@@ -136,7 +147,8 @@ See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) for the h
 7. In `firmware/current/EVO270_ReadOnly_Reference/`, copy `secrets.example.h` to `secrets.h` and fill in Wi-Fi/MQTT credentials. The `secrets.h` file must stay in the **same Arduino sketch folder** as `EVO270_ReadOnly_Reference.ino`.
 8. Move to the canonical read-only firmware.
 9. Confirm Home Assistant MQTT Discovery entities are created.
-10. Leave writes disabled until every target register, range and side effect is independently verified.
+10. Install Mushroom Cards and card-mod if using the supplied dashboard, then import the dashboard YAML and adjust entity IDs for your installation if required.
+11. Leave writes disabled until every target register, range and side effect is independently verified.
 
 ## Observed harness colours
 
