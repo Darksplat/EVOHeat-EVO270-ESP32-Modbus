@@ -18,6 +18,8 @@ The important field-proven behaviour is retained:
 - browser diagnostics
 - MQTT
 - Home Assistant Discovery
-- legacy entity ID preservation
+- automatic identity from the Waveshare ESP32 Wi-Fi MAC
 
-For exact development filenames and history see `../docs/PROJECT_HISTORY.md`.
+The public firmware does **not** require or reuse the removed Aqua Temp Wi-Fi module's MAC/device code. Each Waveshare derives its own 12-digit device ID at runtime and uses that for its MQTT namespace and Home Assistant unique IDs.
+
+For exact development filenames and history see `../../docs/PROJECT_HISTORY.md`.
