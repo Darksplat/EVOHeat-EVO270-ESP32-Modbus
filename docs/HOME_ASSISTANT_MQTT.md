@@ -3,35 +3,32 @@
 ## Goals
 
 - local operation with no cloud dependency for monitoring
-- preserve legacy Aqua Temp-style Home Assistant entity IDs where practical
+- identify each local controller from the replacement Waveshare ESP32 hardware
 - expose climate/select state without allowing unsafe writes during validation
 - keep raw Modbus troubleshooting available via serial/browser logs
 
-## Per-device MQTT roots
+## Device identity
 
-Example development profiles:
+The original Aqua Temp wireless module's MAC-derived device code is **not** used by the public firmware.
+
+Instead, the firmware reads the **Waveshare ESP32 Wi-Fi MAC address automatically**, removes the colons and lower-cases it. That 12-hex-character value becomes the local device identifier.
+
+Example only:
 
 ```text
-evo270/34eae7b41fea
-evo270/34eae79f4bce
+Waveshare Wi-Fi MAC: AA:BB:CC:DD:EE:FF
+Device ID:           aabbccddeeff
+MQTT client ID:      evo270-aabbccddeeff
+MQTT root:           evo270/aabbccddeeff
 ```
 
-Each unit must have a unique MQTT client ID, availability topic and Home Assistant unique ID namespace.
+Every Waveshare therefore gets its own MQTT client ID, availability topic and Home Assistant unique-ID namespace without the user having to type a hardware ID into the sketch.
 
 ## Discovery
 
-The installed V2.1.2 firmware publishes Home Assistant MQTT Discovery for:
+The project design publishes Home Assistant MQTT Discovery for the mapped EVO270/HW211 state exposed by the firmware, using the Waveshare-derived device ID as the namespace.
 
-- mapped numeric sensors
-- status binary sensors
-- power/fault/link indicators
-- operating mode
-- temperature unit
-- climate current temperature
-- climate target temperature
-- HVAC mode/action/fan state
-
-Legacy IDs are preserved deliberately even where the old Aqua Temp spelling/numbering is odd.
+The register/entity **suffixes** retain the useful Aqua Temp/HW211 naming where it helps map old entities back to local registers, but a previous Aqua Temp wireless-module MAC is not required.
 
 ## Read-only command handling
 
@@ -49,3 +46,7 @@ If Home Assistant sends a command to a read-only climate/select command topic, t
 - slow configuration values: every 5 minutes
 
 This avoids continuously hammering the controller with a full map read.
+
+## Fresh Home Assistant installations
+
+A fresh installation is preferred. Flash the local firmware, allow MQTT Discovery to create the new Waveshare-based EVO270 device, then build/import the dashboard using the entity IDs Home Assistant creates for that device.
