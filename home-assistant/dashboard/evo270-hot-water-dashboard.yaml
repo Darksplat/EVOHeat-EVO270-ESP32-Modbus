@@ -9,78 +9,45 @@ views:
       - type: grid
         cards:
           - type: heading
-            heading: Bathroom & Laundry
+            heading: Unit 1
             icon: mdi:shower
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: climate.34eae7b41fea
+                entity: climate.replace_with_unit1_id
                 primary: >
-                  {{ state_attr('climate.34eae7b41fea', 'current_temperature') |
+                  {{ state_attr('climate.replace_with_unit1_id', 'current_temperature') |
                   float(0) | round(1) }} °C
                 secondary: >
-                  {% set action = state_attr('climate.34eae7b41fea',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae7b41fea_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit1_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit1_id_fault', 'on') %}
                     ⚠ FAULT
-
-                  {% elif is_state(
-                    'climate.34eae7b41fea',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit1_id', 'off') %}
                     ⏻ OFF
-
                   {% elif action == 'heating' %}
                     🔥 HEATING
-
                   {% else %}
                     ✓ READY
                   {% endif %}
                 icon: >
-                  {% set action = state_attr('climate.34eae7b41fea',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae7b41fea_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit1_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit1_id_fault', 'on') %}
                     mdi:alert-circle
-
-                  {% elif is_state(
-                    'climate.34eae7b41fea',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit1_id', 'off') %}
                     mdi:water-boiler-off
-
                   {% elif action == 'heating' %}
                     mdi:water-boiler
-
                   {% else %}
                     mdi:check-circle
                   {% endif %}
                 icon_color: >
-                  {% set action = state_attr('climate.34eae7b41fea',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae7b41fea_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit1_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit1_id_fault', 'on') %}
                     red
-
-                  {% elif is_state(
-                    'climate.34eae7b41fea',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit1_id', 'off') %}
                     grey
-
                   {% elif action == 'heating' %}
                     orange
-
                   {% else %}
                     green
                   {% endif %}
@@ -97,20 +64,16 @@ views:
                       height: 250px;
                       border-radius: 30px;
                     }
-
                     mushroom-shape-icon {
                       --icon-size: 90px;
                     }
-
                     mushroom-state-info {
                       text-align: center;
                     }
-
                     .primary {
                       font-size: 32px !important;
                       font-weight: 700 !important;
                     }
-
                     .secondary {
                       font-size: 17px !important;
                       font-weight: 600 !important;
@@ -119,13 +82,11 @@ views:
               - type: vertical-stack
                 cards:
                   - type: custom:mushroom-template-card
-                    entity: climate.34eae7b41fea
+                    entity: climate.replace_with_unit1_id
                     primary: Target
-                    secondary: |
-                      {{ state_attr(
-                        'climate.34eae7b41fea',
-                        'temperature'
-                      ) | float(0) | round(1) }} °C
+                    secondary: >
+                      {{ state_attr('climate.replace_with_unit1_id', 'temperature') |
+                      float(0) | round(1) }} °C
                     icon: mdi:thermometer-check
                     icon_color: orange
                     tap_action:
@@ -136,18 +97,15 @@ views:
                           height: 85px;
                           border-radius: 22px;
                         }
-
                         .primary {
                           font-weight: 600 !important;
                         }
-
                         .secondary {
                           font-size: 17px !important;
                           font-weight: 600 !important;
                         }
                   - type: tile
-                    entity: >-
-                      select.backyard_evo270_bathroom_laundry_34eae7b41fea_34eae7b41fea_operating_mode
+                    entity: select.replace_with_unit1_operating_mode
                     name: Operating Mode
                     icon: mdi:cog
                     vertical: false
@@ -162,8 +120,8 @@ views:
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: sensor.34eae7b41fea_top_temperature_t03
-                primary: |
+                entity: sensor.replace_with_unit1_id_top_temperature_t03
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Top
                 icon: mdi:thermometer-chevron-up
@@ -178,8 +136,8 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: sensor.34eae7b41fea_bottom_temperature_t02
-                primary: |
+                entity: sensor.replace_with_unit1_id_bottom_temperature_t02
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Bottom
                 icon: mdi:thermometer-chevron-down
@@ -194,8 +152,8 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: sensor.34eae7b41fea_ambient_temperature_t01
-                primary: |
+                entity: sensor.replace_with_unit1_id_ambient_temperature_t01
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Ambient
                 icon: mdi:home-thermometer-outline
@@ -212,21 +170,21 @@ views:
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: binary_sensor.34eae7b41fea_api_status
+                entity: binary_sensor.replace_with_unit1_id_api_status
                 primary: API
-                secondary: |
+                secondary: >
                   {% if is_state(entity, 'on') %}
                     Online
                   {% else %}
                     Offline
                   {% endif %}
-                icon: |
+                icon: >
                   {% if is_state(entity, 'on') %}
                     mdi:cloud-check
                   {% else %}
                     mdi:cloud-alert
                   {% endif %}
-                icon_color: |
+                icon_color: >
                   {% if is_state(entity, 'on') %}
                     green
                   {% else %}
@@ -242,21 +200,21 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: binary_sensor.34eae7b41fea_fault
+                entity: binary_sensor.replace_with_unit1_id_fault
                 primary: System
-                secondary: |
+                secondary: >
                   {% if is_state(entity, 'on') %}
                     FAULT
                   {% else %}
                     Normal
                   {% endif %}
-                icon: |
+                icon: >
                   {% if is_state(entity, 'on') %}
                     mdi:alert-circle
                   {% else %}
                     mdi:check-circle
                   {% endif %}
-                icon_color: |
+                icon_color: >
                   {% if is_state(entity, 'on') %}
                     red
                   {% else %}
@@ -274,78 +232,45 @@ views:
       - type: grid
         cards:
           - type: heading
-            heading: Ensuite & Kitchen
+            heading: Unit 2
             icon: mdi:silverware-fork-knife
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: climate.34eae79f4bce
+                entity: climate.replace_with_unit2_id
                 primary: >
-                  {{ state_attr('climate.34eae79f4bce', 'current_temperature') |
+                  {{ state_attr('climate.replace_with_unit2_id', 'current_temperature') |
                   float(0) | round(1) }} °C
                 secondary: >
-                  {% set action = state_attr('climate.34eae79f4bce',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae79f4bce_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit2_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit2_id_fault', 'on') %}
                     ⚠ FAULT
-
-                  {% elif is_state(
-                    'climate.34eae79f4bce',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit2_id', 'off') %}
                     ⏻ OFF
-
                   {% elif action == 'heating' %}
                     🔥 HEATING
-
                   {% else %}
                     ✓ READY
                   {% endif %}
                 icon: >
-                  {% set action = state_attr('climate.34eae79f4bce',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae79f4bce_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit2_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit2_id_fault', 'on') %}
                     mdi:alert-circle
-
-                  {% elif is_state(
-                    'climate.34eae79f4bce',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit2_id', 'off') %}
                     mdi:water-boiler-off
-
                   {% elif action == 'heating' %}
                     mdi:water-boiler
-
                   {% else %}
                     mdi:check-circle
                   {% endif %}
                 icon_color: >
-                  {% set action = state_attr('climate.34eae79f4bce',
-                  'hvac_action') %}
-
-                  {% if is_state(
-                    'binary_sensor.34eae79f4bce_fault',
-                    'on'
-                  ) %}
+                  {% set action = state_attr('climate.replace_with_unit2_id', 'hvac_action') %}
+                  {% if is_state('binary_sensor.replace_with_unit2_id_fault', 'on') %}
                     red
-
-                  {% elif is_state(
-                    'climate.34eae79f4bce',
-                    'off'
-                  ) %}
+                  {% elif is_state('climate.replace_with_unit2_id', 'off') %}
                     grey
-
                   {% elif action == 'heating' %}
                     orange
-
                   {% else %}
                     green
                   {% endif %}
@@ -362,20 +287,16 @@ views:
                       height: 250px;
                       border-radius: 30px;
                     }
-
                     mushroom-shape-icon {
                       --icon-size: 90px;
                     }
-
                     mushroom-state-info {
                       text-align: center;
                     }
-
                     .primary {
                       font-size: 32px !important;
                       font-weight: 700 !important;
                     }
-
                     .secondary {
                       font-size: 17px !important;
                       font-weight: 600 !important;
@@ -384,13 +305,11 @@ views:
               - type: vertical-stack
                 cards:
                   - type: custom:mushroom-template-card
-                    entity: climate.34eae79f4bce
+                    entity: climate.replace_with_unit2_id
                     primary: Target
-                    secondary: |
-                      {{ state_attr(
-                        'climate.34eae79f4bce',
-                        'temperature'
-                      ) | float(0) | round(1) }} °C
+                    secondary: >
+                      {{ state_attr('climate.replace_with_unit2_id', 'temperature') |
+                      float(0) | round(1) }} °C
                     icon: mdi:thermometer-check
                     icon_color: orange
                     tap_action:
@@ -401,18 +320,15 @@ views:
                           height: 85px;
                           border-radius: 22px;
                         }
-
                         .primary {
                           font-weight: 600 !important;
                         }
-
                         .secondary {
                           font-size: 17px !important;
                           font-weight: 600 !important;
                         }
                   - type: tile
-                    entity: >-
-                      select.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_34eae79f4bce_operating_mode
+                    entity: select.replace_with_unit2_operating_mode
                     name: Operating Mode
                     icon: mdi:cog
                     vertical: false
@@ -427,8 +343,8 @@ views:
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: sensor.34eae79f4bce_top_temperature_t03
-                primary: |
+                entity: sensor.replace_with_unit2_id_top_temperature_t03
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Top
                 icon: mdi:thermometer-chevron-up
@@ -443,8 +359,8 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: sensor.34eae79f4bce_bottom_temperature_t02
-                primary: |
+                entity: sensor.replace_with_unit2_id_bottom_temperature_t02
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Bottom
                 icon: mdi:thermometer-chevron-down
@@ -459,8 +375,8 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: sensor.34eae79f4bce_ambient_temperature_t01
-                primary: |
+                entity: sensor.replace_with_unit2_id_ambient_temperature_t01
+                primary: >
                   {{ states(entity) | float(0) | round(1) }} °C
                 secondary: Ambient
                 icon: mdi:home-thermometer-outline
@@ -477,21 +393,21 @@ views:
           - type: horizontal-stack
             cards:
               - type: custom:mushroom-template-card
-                entity: binary_sensor.34eae79f4bce_api_status
+                entity: binary_sensor.replace_with_unit2_id_api_status
                 primary: API
-                secondary: |
+                secondary: >
                   {% if is_state(entity, 'on') %}
                     Online
                   {% else %}
                     Offline
                   {% endif %}
-                icon: |
+                icon: >
                   {% if is_state(entity, 'on') %}
                     mdi:cloud-check
                   {% else %}
                     mdi:cloud-alert
                   {% endif %}
-                icon_color: |
+                icon_color: >
                   {% if is_state(entity, 'on') %}
                     green
                   {% else %}
@@ -507,21 +423,21 @@ views:
                       border-radius: 25px;
                     }
               - type: custom:mushroom-template-card
-                entity: binary_sensor.34eae79f4bce_fault
+                entity: binary_sensor.replace_with_unit2_id_fault
                 primary: System
-                secondary: |
+                secondary: >
                   {% if is_state(entity, 'on') %}
                     FAULT
                   {% else %}
                     Normal
                   {% endif %}
-                icon: |
+                icon: >
                   {% if is_state(entity, 'on') %}
                     mdi:alert-circle
                   {% else %}
                     mdi:check-circle
                   {% endif %}
-                icon_color: |
+                icon_color: >
                   {% if is_state(entity, 'on') %}
                     red
                   {% else %}
@@ -535,105 +451,4 @@ views:
                     ha-card {
                       height: 130px;
                       border-radius: 25px;
-                    }
-      - type: grid
-        cards:
-          - type: heading
-            heading: Controller Clocks
-            icon: mdi:clock-check-outline
-          - type: horizontal-stack
-            cards:
-              - type: custom:mushroom-template-card
-                entity: >-
-                  sensor.backyard_evo270_bathroom_laundry_34eae7b41fea_evo270_bathroom_laundry_unit_time
-                primary: Bathroom & Laundry
-                secondary: >
-                  {% set clock =
-                  states('sensor.backyard_evo270_bathroom_laundry_34eae7b41fea_evo270_bathroom_laundry_unit_time')
-                  %} {% set date =
-                  state_attr('sensor.backyard_evo270_bathroom_laundry_34eae7b41fea_evo270_bathroom_laundry_unit_time',
-                  'date') %} Last set: {{ date }} • {{ clock }}
-                icon: mdi:clock-sync
-                icon_color: green
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: aqua_temp.sync_clock
-                  data:
-                    device_code: 34EAE7B41FEA
-                hold_action:
-                  action: none
-                double_tap_action:
-                  action: none
-                card_mod:
-                  style: |
-                    ha-card {
-                      height: 180px;
-                      border-radius: 25px;
-                    }
-
-                    mushroom-shape-icon {
-                      --icon-size: 64px;
-                    }
-
-                    mushroom-state-info {
-                      text-align: center;
-                    }
-
-                    .primary {
-                      font-size: 20px !important;
-                      font-weight: 700 !important;
-                    }
-
-                    .secondary {
-                      font-size: 15px !important;
-                      font-weight: 600 !important;
-                      margin-top: 8px !important;
-                    }
-              - type: custom:mushroom-template-card
-                entity: >-
-                  sensor.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_evo270_ensuite_kitchen_unit_time
-                primary: Ensuite & Kitchen
-                secondary: >
-                  {% set clock =
-                  states('sensor.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_evo270_ensuite_kitchen_unit_time')
-                  %} {% set date =
-                  state_attr('sensor.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_evo270_ensuite_kitchen_unit_time',
-                  'date') %} Last set: {{ date }} • {{ clock }}
-                icon: mdi:clock-sync
-                icon_color: green
-                layout: vertical
-                tap_action:
-                  action: perform-action
-                  perform_action: aqua_temp.sync_clock
-                  data:
-                    device_code: 34EAE79F4BCE
-                hold_action:
-                  action: none
-                double_tap_action:
-                  action: none
-                card_mod:
-                  style: |
-                    ha-card {
-                      height: 180px;
-                      border-radius: 25px;
-                    }
-
-                    mushroom-shape-icon {
-                      --icon-size: 64px;
-                    }
-
-                    mushroom-state-info {
-                      text-align: center;
-                    }
-
-                    .primary {
-                      font-size: 20px !important;
-                      font-weight: 700 !important;
-                    }
-
-                    .secondary {
-                      font-size: 15px !important;
-                      font-weight: 600 !important;
-                      margin-top: 8px !important;
                     }
