@@ -1,6 +1,22 @@
 register,meaning,access_in_this_project,notes
-1011,Power,read-only,0=off 1=on
+1011,Power,verified-write,0=off 1=on
+1012,Requested operation mode,verified-write,"0=Intelligent 2=Economic 3=Hybrid 4=High Demand 7=Vacation"
 1013,Actual operation mode,read-only,Observed mode values 0/2/3/4/7
+1046,Disinfection target temperature G01,read-only,TEMP1
+1047,Disinfection duration G02,read-only,minutes
+1048,Disinfection startup point G03,read-only,hour
+1049,Disinfection cycle G04,read-only,days
+1080-1090,Solar thermal N01-N11,read-only,"Solar-thermal pump/collector controls; not PV control"
+1104,Target temperature R01,verified-write,"10-60 C in 0.5 C steps in V2.2.7"
+1129,Vacation date enable L01,verified-write,bit0
+1130,Vacation year,verified-write,two-digit year
+1131,Vacation month,verified-write,1-12
+1132,Vacation day,verified-write,calendar day
+1133,Timer enable mask,verified-write,"bit0 T1 ON; bit1 T1 OFF; bit2 T2 ON; bit3 T2 OFF"
+1134-1137,Timer 1 ON/OFF hour/minute,verified-write,protected multi-field update
+1138-1141,Timer 2 ON/OFF hour/minute,verified-write,protected multi-field update
+1151,Clock M11 apply flag,verified-command,apply after clock mailbox payload
+1152-1156,Clock minute/hour/day/month/year,verified-command,"command mailbox; not live clock readback"
 2019,Ambient temperature T01,read-only,Known-good commissioning register
 2020,Bottom tank temperature T02,read-only,TEMP1
 2021,Top tank temperature T03,read-only,TEMP1
@@ -8,4 +24,3 @@ register,meaning,access_in_this_project,notes
 2050,Status0 bitfield,read-only,Outputs and switch states
 2051,Status1 bitfield,read-only,Shutdown/DTU/defrost/high-temp flags
 2085,Fault0 bitfield,read-only,Non-zero treated as fault active
-1104,Target temperature R01,read-only,Used for HA climate target temperature

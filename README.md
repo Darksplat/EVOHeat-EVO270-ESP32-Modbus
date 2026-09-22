@@ -1,28 +1,31 @@
-# EVOHeat EVO270-1 local ESP32 / Modbus monitor
+# EVOHeat EVO270-1 local ESP32 / Modbus control
 
-Local, cloud-independent monitoring of an **EVOHeat EVO270-1** heat-pump hot-water system using the **HW211-family controller** and a **Waveshare ESP32-S3-RS485-CAN**.
+Local, cloud-independent monitoring and **field-verified local control** of an **EVOHeat EVO270-1** heat-pump hot-water system using the **HW211-family controller**, a **Waveshare ESP32-S3-RS485-CAN**, MQTT and Home Assistant.
 
-This repository records the field work that took the installation from protocol research and ESPHome commissioning attempts to a reliable, **read-only Arduino + MQTT + Home Assistant** implementation.
+> **Current status:** V2.2.7 is deployed and validated on two EVO270-1 units. Monitoring, target temperature, power, operating mode, Vacation scheduling, Timer 1/2 scheduling and controller-clock setting are local. Writes are deliberately restricted to a tested allow-list.
 
-> **Status:** field-tested read-only monitoring. No Modbus write function is included in the current public firmware.
+## Current firmware
+
+Two exact deployment sketches are kept under `firmware/current/`:
+
+- `EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/`
+- `EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/`
+
+Each Arduino sketch folder also contains `evo270_types.h` and a safe `secrets.example.h`. Copy the example to `secrets.h` locally and **never commit credentials**.
+
+V2.2.7 adds a main-page link to the manual clock-test page and retains the validated V2.2.6 weekly forced NTP clock synchronization.
 
 ## Hardware used / where to get it
 
 | Part | Source | Notes |
 |---|---|---|
 | Waveshare ESP32-S3-RS485-CAN | [Waveshare product page](https://www.waveshare.com/esp32-s3-rs485-can.htm) | Exact controller board used. It accepts 7–36 V DC at the screw-terminal input and has isolated RS485 onboard. |
-| EVO270 replacement connector / pigtail | [Tempero Systems – 5-pin male/female JST-SM locking pigtail](https://temperosystems.com.au/products/5pin-male-female-jst-sm-locking-pigtail/) | Exact replacement connector/pigtail used. **The supplied pins/wires must be checked and rearranged to the EVO270 mapping before use.** |
+| EVO270 replacement connector / pigtail | [Tempero Systems – 5-pin male/female JST-SM locking pigtail](https://temperosystems.com.au/products/5pin-male-female-jst-sm-locking-pigtail/) | Physically suitable pigtail. **Check and rearrange the supplied pins/wires to the EVO270 mapping before use.** |
 | EVO270-1 | [EvoHeat EVO270-1 product page](https://evoheat.com.au/hot-water-heat-pump/evo-270/) | Manufacturer reference/manual source. |
 
-See [`docs/KNOWN_WORKING_HARDWARE.md`](docs/KNOWN_WORKING_HARDWARE.md) and [`docs/HARDWARE_AND_WIRING.md`](docs/HARDWARE_AND_WIRING.md).
+See `docs/KNOWN_WORKING_HARDWARE.md` and `docs/HARDWARE_AND_WIRING.md`.
 
-## Important connector warning
-
-The Tempero 5-pin JST-SM locking pigtail physically fits the job, but **do not assume its supplied pin/wire order matches the EVO270**.
-
-For a neat plug-in harness, compare it with the original EVO270 Wi-Fi/RS485 connector, release the crimp terminals with a small pick/terminal tool and **re-insert them into the correct connector cavities**.
-
-If you do not want to de-pin/re-pin the pigtail, the alternative is to **snip and solder the lead function-for-function**, heat-shrink every conductor individually and protect the finished splice mechanically.
+## Wiring
 
 Observed on the tested installation:
 
@@ -34,30 +37,9 @@ Observed on the tested installation:
 | Yellow | RS485 B | B- |
 | Orange | Shield / earth | Not connected to the Waveshare in this installation |
 
-**Verify connector position, function, polarity and continuity before applying power. Do not trust an aftermarket pigtail's colour order.**
+**Verify connector position, function, polarity and continuity before applying power.** The Waveshare may be powered from the EVO270 12 V accessory supply through its DC screw terminals. Do not apply 12 V to a bare ESP32 5 V or 3.3 V pin.
 
-The Waveshare board can be powered from the EVO270's 12 V accessory supply through its DC screw terminals. Do **not** apply 12 V to a bare ESP32 5 V or 3.3 V pin.
-
-## Device identity: use the Waveshare, not the old Wi-Fi module
-
-The original Aqua Temp wireless module used a MAC-derived device code. That removed wireless module is **not** the identity of the local controller in this project.
-
-The public firmware now automatically reads the replacement **Waveshare ESP32 Wi-Fi MAC address**, removes the colons and uses the resulting 12 hexadecimal digits as the local device ID.
-
-Example only:
-
-```text
-Waveshare Wi-Fi MAC: AA:BB:CC:DD:EE:FF
-Device ID:           aabbccddeeff
-MQTT client ID:      evo270-aabbccddeeff
-MQTT root:           evo270/aabbccddeeff
-```
-
-There is nothing for the user to type or copy from the old Aqua Temp module. Each Waveshare creates its own unique MQTT/Home Assistant namespace automatically.
-
-A fresh Home Assistant device/entity set is recommended rather than trying to preserve old cloud-integration history.
-
-## What is proven on this installation
+## Proven transport
 
 | Item | Value |
 |---|---|
@@ -70,8 +52,6 @@ A fresh Home Assistant device/entity set is recommended rather than trying to pr
 | RS485 direction / EN | GPIO21 |
 | EN HIGH | transmit |
 | EN LOW | receive |
-| Known-good test register | 2019 / T01 ambient temperature |
-| Temperature decode | `(raw - 60) * 0.5` °C |
 | Fast poll | 20 s |
 | Slow/config poll | 5 min |
 
@@ -83,83 +63,90 @@ RX: 63 03 02 00 61 80 64
 raw 97 -> 18.5 °C
 ```
 
-## Why Arduino rather than ESPHome here?
+## Verified local writes
 
-ESPHome was the first approach. On this exact Waveshare ESP32-S3-RS485-CAN + EVO270/HW211 installation, ESPHome 2026.8.1 repeatedly timed out after partial one-byte `FE` responses even with the correct 9600 8N1/slave settings.
+V2.2.7 does **not** provide unrestricted Modbus writing. The production sketches allow only the registers and ranges verified on the installed units.
 
-A direct Arduino test became reliable when the RS485 transceiver direction was driven explicitly:
+| Register(s) | Function |
+|---|---|
+| 1011 | Power |
+| 1012 | Requested operating mode |
+| 1104 | Target water temperature |
+| 1129–1132 | Vacation date enable/date |
+| 1133–1141 | Timer 1 / Timer 2 enable mask and times |
+| 1151–1156 | Controller clock command/apply mailbox |
 
-1. GPIO21 HIGH
-2. write the Modbus RTU frame
-3. `RS485.flush()`
-4. short guard delay
-5. GPIO21 LOW
-6. receive and validate the response
+Normal single-register controls use Function 06 with response validation and Function 03 readback. Schedule/date changes protect the active timer mask while changing related fields and attempt rollback if validation fails.
 
-See [`docs/ESPHOME_FAILURE.md`](docs/ESPHOME_FAILURE.md). This is an **installation-specific interoperability finding**, not a claim that ESPHome Modbus is universally broken.
+## Controller clock
+
+The clock work uncovered an important protocol detail: registers **1151–1156 are not a continuously readable controller clock**. They behave as a clock command/apply mailbox.
+
+The proven sequence writes minute/hour/day/month/year to 1152–1156, verifies the payload, then applies it with M11 at register 1151.
+
+Both deployed ESP32s obtain Melbourne/Victoria time from NTP using DST rules and force a clock push once each **Monday during the 01:00 local hour**. A failed scheduled attempt can retry in ten-minute buckets during that hour.
+
+The embedded web UI also provides `/clock-test` for an explicit manual NTP clock push.
 
 ## Home Assistant
 
-The local firmware publishes through MQTT and uses the Waveshare-derived device ID as its namespace.
+MQTT Discovery exposes the monitoring and control entities. The current two-unit dashboard is:
 
-The public dashboard template is included at:
+[`home-assistant/dashboard/hot-water-dashboard.yaml`](home-assistant/dashboard/hot-water-dashboard.yaml)
 
-[`home-assistant/dashboard/evo270-hot-water-dashboard.yaml`](home-assistant/dashboard/evo270-hot-water-dashboard.yaml)
+It uses **Mushroom Cards** and **card-mod** and includes:
 
-It uses **Mushroom Cards** and **card-mod**. The template contains `replace_with_unit1_id` and `replace_with_unit2_id` placeholders because every user's Waveshare MAC will be different.
+- main temperature, target and operating-mode controls;
+- tank and heat-pump temperatures;
+- compressor, booster, defrost, fan, valve and pump state;
+- Modbus/API/power/fault health;
+- Vacation return date;
+- Timer 1 and Timer 2 controls;
+- disinfection settings/status; and
+- local clock-sync status and last clock command.
 
-The old Aqua Temp **Controller Clocks** cards have been removed from the public dashboard because they depended on the previous cloud/custom integration rather than the local Arduino/MQTT implementation.
+See `home-assistant/README.md`.
 
-See [`home-assistant/README.md`](home-assistant/README.md) for installation instructions.
+## Solar register warning
 
-## For first-time builders
+The N01–N11 / 1080–1090 register block appears to describe **solar-thermal collector/pump control**, not rooftop PV curtailment or PV-surplus control. It remains monitoring-only in this project unless the relevant solar-thermal hardware and write behavior are independently verified.
 
-The documentation is being built so somebody can reproduce the project without already understanding RS485 or connector pin extraction. The photo walkthrough covers:
+## Why Arduino rather than ESPHome here?
 
-1. the EVO270 and controller area;
-2. the original Wi-Fi/RS485 connector;
-3. the Tempero 5-pin JST-SM pigtail;
-4. original vs replacement connector;
-5. releasing/de-pinning a JST-SM terminal;
-6. the correctly re-pinned connector;
-7. Waveshare DC+/DC-/A+/B- connections;
-8. the completed harness;
-9. the Waveshare installed inside the EVO270;
-10. a successful Arduino Modbus response; and
-11. the final Home Assistant device/dashboard.
+ESPHome 2026.8.1 was the first approach. On this exact Waveshare ESP32-S3-RS485-CAN + EVO270/HW211 installation, it repeatedly timed out after partial one-byte `FE` responses. A direct Arduino transaction became reliable when GPIO21 direction control was driven explicitly.
+
+See `docs/ESPHOME_FAILURE.md`. This is an installation-specific interoperability finding, not a claim that ESPHome Modbus is universally broken.
 
 ## Repository layout
 
-- `firmware/current/` – current public-safe read-only reference firmware
-- `firmware/commissioning/` – known-good single-register OTA/browser-monitor sketches
+- `firmware/current/` – exact V2.2.7 deployment sketches
+- `firmware/commissioning/` – early known-good single-register OTA/browser-monitor sketches
 - `firmware/testbench/` – RS485 master/slave bench sketches
-- `home-assistant/` – dashboard template and installation/dependency notes
-- `data/` – register, status-bit, mode and legacy entity/register mapping tables
-- `docs/` – wiring, protocol, MQTT, commissioning, ESPHome failure analysis and project history
+- `home-assistant/` – current dashboard and Home Assistant notes
+- `data/` – register, mode and status-bit mapping tables
+- `docs/` – wiring, protocol, commissioning, MQTT and project history
 - `diagnostics/` – sanitized commissioning/failure excerpts
 - `references/` – upstream projects and licensing notes
 
 ## Quick start
 
-1. Obtain the Waveshare board and Tempero **5-pin male/female JST-SM locking pigtail**.
-2. De-pin/re-pin the JST-SM pigtail to match the EVO270 connector, or splice it correctly by soldering.
-3. Verify +12 V, GND, RS485 A and RS485 B before connecting the Waveshare.
-4. Start with `firmware/commissioning/EVO270_Laundry_Bathroom_Arduino_OTA.ino` and confirm register 2019 reads correctly.
-5. In `firmware/current/EVO270_ReadOnly_Reference/`, copy `secrets.example.h` to `secrets.h` and enter Wi-Fi/MQTT credentials. Keep `secrets.h` in the same Arduino sketch folder and never commit it.
-6. Flash the current read-only firmware. The Waveshare's own Wi-Fi MAC automatically becomes its local device identity.
-7. Confirm MQTT Discovery creates the EVO270 device/entities in Home Assistant.
-8. Install Mushroom Cards and card-mod if using the supplied dashboard.
-9. Import the dashboard YAML and replace the unit-ID placeholders with the entity IDs created on your Home Assistant system.
-10. Leave Modbus writes disabled until every target register, range and side effect is independently verified.
+1. Wire the Waveshare to the EVO270 low-voltage RS485/accessory connector and verify polarity.
+2. Open the V2.2.7 sketch folder for the unit being commissioned.
+3. Copy `secrets.example.h` to `secrets.h` and enter Wi-Fi, MQTT and optional OTA credentials locally.
+4. In Arduino IDE select **ESP32S3 Dev Module**.
+5. Build/flash, then verify the embedded web page and `/diag`.
+6. Confirm MQTT Discovery creates the expected Home Assistant entities.
+7. Install Mushroom Cards and card-mod if using the supplied dashboard.
+8. Import `home-assistant/dashboard/hot-water-dashboard.yaml`.
 
 ## Credits
 
-This work would have taken much longer without:
+This project builds on published community work from:
 
-- **[sjtrny/esphome-hw211](https://github.com/sjtrny/esphome-hw211)** — especially the machine-readable HW211 Modbus protocol work and ESPHome component. That repository is MIT licensed.
-- **[echopin664/EVO270-1-HWS](https://github.com/echopin664/EVO270-1-HWS)** — valuable prior work demonstrating local EVO270-1/HW211 RS485 control with ESP32 + Home Assistant and providing an EVO270 Modbus map.
+- **[sjtrny/esphome-hw211](https://github.com/sjtrny/esphome-hw211)** — structured HW211 protocol data and ESPHome implementation reference.
+- **[echopin664/EVO270-1-HWS](https://github.com/echopin664/EVO270-1-HWS)** — earlier practical EVO270-1 local-control work.
 
-See [`ACKNOWLEDGEMENTS.md`](ACKNOWLEDGEMENTS.md) and [`NOTICE.md`](NOTICE.md).
+See `ACKNOWLEDGEMENTS.md` and `NOTICE.md`.
 
 ## Safety / scope
 
@@ -167,4 +154,4 @@ This is an independent community project and is not affiliated with or endorsed 
 
 Disconnect/isolate mains power before opening the EVO270 enclosure. The low-voltage Wi-Fi/RS485 harness is inside equipment that also contains mains-voltage wiring.
 
-Heat-pump hot-water controllers can have compressor protection, disinfection, anti-freeze and safety-related parameters. This repository intentionally defaults to **read-only** operation. Any future write support should be narrowly allow-listed and range-checked.
+Heat-pump hot-water controllers contain compressor protection, disinfection, anti-freeze and other safety-related parameters. Do not extend the write allow-list without validating the register, valid range and side effects on the exact controller.
