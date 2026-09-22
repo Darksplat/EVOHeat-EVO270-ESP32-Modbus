@@ -1,0 +1,648 @@
+name: Finalize V2.2.7 repository update
+
+on:
+  push:
+    branches:
+      - update-v2.2.7-firmware-dashboard
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: update-v2.2.7-firmware-dashboard
+
+      - name: Reconstruct validated firmware and dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat .staging/bath.part00.b64 .staging/bath.part01.b64 .staging/bath.part02.b64 .staging/bath.part03.b64             | base64 -d | gzip -d > /tmp/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink.ino
+          echo "e61d9e957cf9ea74ba5cf6bb225195d22478a8cb3c1ae71438479cb323d3a1f4  /tmp/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink.ino" | sha256sum -c -
+
+          cat .staging/dashboard.gz.b64 | base64 -d | gzip -d > /tmp/hot-water-dashboard.yaml
+          echo "8bfaaddea5ec1f1393ee288d66c1fb8e242e3b805f2bcd0b477b8528812e7699  /tmp/hot-water-dashboard.yaml" | sha256sum -c -
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          src = Path("/tmp/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink.ino").read_text()
+          replacements = [
+              ("EVOHeat EVO270-1 - Bathroom / Laundry HWS", "EVOHeat EVO270-1 - Ensuite / Kitchen HWS"),
+              ("EVO270 – Bathroom & Laundry 34EAE7B41FEA", "EVO270 – Ensuite & Kitchen 34EAE79F4BCE"),
+              ("34eae7b41fea", "34eae79f4bce"),
+              ("34EAE7B41FEA", "34EAE79F4BCE"),
+              ("A022106088050", "A022112238161"),
+              ("evo270-laundry-bathroom", "evo270-ensuite-kitchen"),
+              ("select.backyard_evo270_bathroom_laundry_", "select.back_fence_garden_evo270_ensuite_kitchen_"),
+              ("evo270_laundry_bathroom_", "evo270_ensuite_kitchen_"),
+              ("EVO270 Bathroom & Laundry", "EVO270 Ensuite & Kitchen"),
+              ("EVOHeat Bathroom &amp; Laundry", "EVOHeat Ensuite &amp; Kitchen"),
+              ("EVO270 BATHROOM / LAUNDRY", "EVO270 ENSUITE / KITCHEN"),
+              ("Bathroom & Laundry unit", "Ensuite & Kitchen unit"),
+          ]
+          for old, new in replacements:
+              src = src.replace(old, new)
+          out = Path("/tmp/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink.ino")
+          out.write_text(src)
+          expected = "8965c80a4c63580f0e78265a953e5204e9f3e7945b1ef5f9f1ba0035ee3c90aa"
+          actual = hashlib.sha256(out.read_bytes()).hexdigest()
+          if actual != expected:
+              raise SystemExit(f"Ensuite firmware hash mismatch: {actual}")
+          PY
+
+      - name: Install current files and remove superseded files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cp firmware/current/EVO270_ReadOnly_Reference/evo270_types.h /tmp/evo270_types.h
+          cp firmware/current/EVO270_ReadOnly_Reference/secrets.example.h /tmp/secrets.example.h
+
+          rm -rf firmware/current/EVO270_ReadOnly_Reference
+          rm -f home-assistant/dashboard/evo270-hot-water-dashboard.yaml
+          rm -f home-assistant/dashboard/hot-water-dashboard-current.yaml
+
+          mkdir -p firmware/current/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink
+          mkdir -p firmware/current/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink
+
+          cp /tmp/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink.ino             firmware/current/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/
+          cp /tmp/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink.ino             firmware/current/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/
+
+          cp /tmp/evo270_types.h firmware/current/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/
+          cp /tmp/evo270_types.h firmware/current/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/
+          cp /tmp/secrets.example.h firmware/current/EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/
+          cp /tmp/secrets.example.h firmware/current/EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/
+
+          cp /tmp/hot-water-dashboard.yaml home-assistant/dashboard/hot-water-dashboard.yaml
+
+      - name: Refresh project documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > README.md <<'EOF'
+          # EVOHeat EVO270-1 local ESP32 / Modbus control
+
+          Local, cloud-independent monitoring and **field-verified local control** of an **EVOHeat EVO270-1** heat-pump hot-water system using the **HW211-family controller**, a **Waveshare ESP32-S3-RS485-CAN**, MQTT and Home Assistant.
+
+          > **Current status:** V2.2.7 is deployed and validated on two EVO270-1 units. Monitoring, target temperature, power, operating mode, Vacation scheduling, Timer 1/2 scheduling and controller-clock setting are local. Writes are deliberately restricted to a tested allow-list.
+
+          ## Current firmware
+
+          Two exact deployment sketches are kept under `firmware/current/`:
+
+          - `EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/`
+          - `EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/`
+
+          Each Arduino sketch folder also contains `evo270_types.h` and a safe `secrets.example.h`. Copy the example to `secrets.h` locally and **never commit credentials**.
+
+          V2.2.7 adds a main-page link to the manual clock-test page and retains the validated V2.2.6 weekly forced NTP clock synchronization.
+
+          ## Hardware used / where to get it
+
+          | Part | Source | Notes |
+          |---|---|---|
+          | Waveshare ESP32-S3-RS485-CAN | [Waveshare product page](https://www.waveshare.com/esp32-s3-rs485-can.htm) | Exact controller board used. It accepts 7–36 V DC at the screw-terminal input and has isolated RS485 onboard. |
+          | EVO270 replacement connector / pigtail | [Tempero Systems – 5-pin male/female JST-SM locking pigtail](https://temperosystems.com.au/products/5pin-male-female-jst-sm-locking-pigtail/) | Physically suitable pigtail. **Check and rearrange the supplied pins/wires to the EVO270 mapping before use.** |
+          | EVO270-1 | [EvoHeat EVO270-1 product page](https://evoheat.com.au/hot-water-heat-pump/evo-270/) | Manufacturer reference/manual source. |
+
+          See `docs/KNOWN_WORKING_HARDWARE.md` and `docs/HARDWARE_AND_WIRING.md`.
+
+          ## Wiring
+
+          Observed on the tested installation:
+
+          | EVO270 harness wire | Function | Waveshare connection |
+          |---|---|---|
+          | Red | +12 V DC | DC+ |
+          | Black | Ground | DC- |
+          | White | RS485 A | A+ |
+          | Yellow | RS485 B | B- |
+          | Orange | Shield / earth | Not connected to the Waveshare in this installation |
+
+          **Verify connector position, function, polarity and continuity before applying power.** The Waveshare may be powered from the EVO270 12 V accessory supply through its DC screw terminals. Do not apply 12 V to a bare ESP32 5 V or 3.3 V pin.
+
+          ## Proven transport
+
+          | Item | Value |
+          |---|---|
+          | Modbus | RTU |
+          | Baud | 9600 |
+          | Format | 8N1 |
+          | DTU/Wi-Fi slave | 99 (`0x63`) |
+          | ESP32 UART TX | GPIO17 |
+          | ESP32 UART RX | GPIO18 |
+          | RS485 direction / EN | GPIO21 |
+          | EN HIGH | transmit |
+          | EN LOW | receive |
+          | Fast poll | 20 s |
+          | Slow/config poll | 5 min |
+
+          Known-good Function 03 commissioning capture:
+
+          ```text
+          TX: 63 03 07 E3 00 01 7C CA
+          RX: 63 03 02 00 61 80 64
+          raw 97 -> 18.5 °C
+          ```
+
+          ## Verified local writes
+
+          V2.2.7 does **not** provide unrestricted Modbus writing. The production sketches allow only the registers and ranges verified on the installed units.
+
+          | Register(s) | Function |
+          |---|---|
+          | 1011 | Power |
+          | 1012 | Requested operating mode |
+          | 1104 | Target water temperature |
+          | 1129–1132 | Vacation date enable/date |
+          | 1133–1141 | Timer 1 / Timer 2 enable mask and times |
+          | 1151–1156 | Controller clock command/apply mailbox |
+
+          Normal single-register controls use Function 06 with response validation and Function 03 readback. Schedule/date changes protect the active timer mask while changing related fields and attempt rollback if validation fails.
+
+          ## Controller clock
+
+          The clock work uncovered an important protocol detail: registers **1151–1156 are not a continuously readable controller clock**. They behave as a clock command/apply mailbox.
+
+          The proven sequence writes minute/hour/day/month/year to 1152–1156, verifies the payload, then applies it with M11 at register 1151.
+
+          Both deployed ESP32s obtain Melbourne/Victoria time from NTP using DST rules and force a clock push once each **Monday during the 01:00 local hour**. A failed scheduled attempt can retry in ten-minute buckets during that hour.
+
+          The embedded web UI also provides `/clock-test` for an explicit manual NTP clock push.
+
+          ## Home Assistant
+
+          MQTT Discovery exposes the monitoring and control entities. The current two-unit dashboard is:
+
+          [`home-assistant/dashboard/hot-water-dashboard.yaml`](home-assistant/dashboard/hot-water-dashboard.yaml)
+
+          It uses **Mushroom Cards** and **card-mod** and includes:
+
+          - main temperature, target and operating-mode controls;
+          - tank and heat-pump temperatures;
+          - compressor, booster, defrost, fan, valve and pump state;
+          - Modbus/API/power/fault health;
+          - Vacation return date;
+          - Timer 1 and Timer 2 controls;
+          - disinfection settings/status; and
+          - local clock-sync status and last clock command.
+
+          See `home-assistant/README.md`.
+
+          ## Solar register warning
+
+          The N01–N11 / 1080–1090 register block appears to describe **solar-thermal collector/pump control**, not rooftop PV curtailment or PV-surplus control. It remains monitoring-only in this project unless the relevant solar-thermal hardware and write behavior are independently verified.
+
+          ## Why Arduino rather than ESPHome here?
+
+          ESPHome 2026.8.1 was the first approach. On this exact Waveshare ESP32-S3-RS485-CAN + EVO270/HW211 installation, it repeatedly timed out after partial one-byte `FE` responses. A direct Arduino transaction became reliable when GPIO21 direction control was driven explicitly.
+
+          See `docs/ESPHOME_FAILURE.md`. This is an installation-specific interoperability finding, not a claim that ESPHome Modbus is universally broken.
+
+          ## Repository layout
+
+          - `firmware/current/` – exact V2.2.7 deployment sketches
+          - `firmware/commissioning/` – early known-good single-register OTA/browser-monitor sketches
+          - `firmware/testbench/` – RS485 master/slave bench sketches
+          - `home-assistant/` – current dashboard and Home Assistant notes
+          - `data/` – register, mode and status-bit mapping tables
+          - `docs/` – wiring, protocol, commissioning, MQTT and project history
+          - `diagnostics/` – sanitized commissioning/failure excerpts
+          - `references/` – upstream projects and licensing notes
+
+          ## Quick start
+
+          1. Wire the Waveshare to the EVO270 low-voltage RS485/accessory connector and verify polarity.
+          2. Open the V2.2.7 sketch folder for the unit being commissioned.
+          3. Copy `secrets.example.h` to `secrets.h` and enter Wi-Fi, MQTT and optional OTA credentials locally.
+          4. In Arduino IDE select **ESP32S3 Dev Module**.
+          5. Build/flash, then verify the embedded web page and `/diag`.
+          6. Confirm MQTT Discovery creates the expected Home Assistant entities.
+          7. Install Mushroom Cards and card-mod if using the supplied dashboard.
+          8. Import `home-assistant/dashboard/hot-water-dashboard.yaml`.
+
+          ## Credits
+
+          This project builds on published community work from:
+
+          - **[sjtrny/esphome-hw211](https://github.com/sjtrny/esphome-hw211)** — structured HW211 protocol data and ESPHome implementation reference.
+          - **[echopin664/EVO270-1-HWS](https://github.com/echopin664/EVO270-1-HWS)** — earlier practical EVO270-1 local-control work.
+
+          See `ACKNOWLEDGEMENTS.md` and `NOTICE.md`.
+
+          ## Safety / scope
+
+          This is an independent community project and is not affiliated with or endorsed by EvoHeat, Aqua Temp, Waveshare or Home Assistant.
+
+          Disconnect/isolate mains power before opening the EVO270 enclosure. The low-voltage Wi-Fi/RS485 harness is inside equipment that also contains mains-voltage wiring.
+
+          Heat-pump hot-water controllers contain compressor protection, disinfection, anti-freeze and other safety-related parameters. Do not extend the write allow-list without validating the register, valid range and side effects on the exact controller.
+          EOF
+
+          cat > firmware/current/README.md <<'EOF'
+          # Current firmware
+
+          The current field-tested release is **V2.2.7-clock-test-link**.
+
+          Exact deployed sketches:
+
+          - `EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/`
+          - `EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/`
+
+          Each sketch folder contains:
+
+          - the matching `.ino`;
+          - `evo270_types.h`;
+          - `secrets.example.h`.
+
+          Copy `secrets.example.h` to `secrets.h` locally. The real `secrets.h` is ignored by git and must not be committed.
+
+          ## Field-proven behavior
+
+          - Waveshare ESP32-S3-RS485-CAN
+          - GPIO17 TX / GPIO18 RX / GPIO21 RS485 direction
+          - 9600 8N1, Modbus slave 99
+          - Function 03 monitoring
+          - narrowly allow-listed Function 06 controls
+          - Function 03 exact readback validation after normal writes
+          - protected Vacation/Timer 1/Timer 2 writes
+          - controller clock command through the 1151–1156 mailbox
+          - NTP with Melbourne/Victoria DST rules
+          - forced Monday 01:00 local clock push
+          - manual `/clock-test`
+          - OTA on port 3232
+          - browser diagnostics
+          - MQTT Discovery for Home Assistant
+
+          The old V2.1.2 read-only reference implementation was removed from `firmware/current/` when V2.2.7 became the validated deployment baseline. Historical commissioning/testbench material remains elsewhere in the repository because it is still useful for troubleshooting.
+          EOF
+
+          cat > home-assistant/README.md <<'EOF'
+          # Home Assistant
+
+          The canonical dashboard for the deployed EVO270 controllers is:
+
+          - `dashboard/hot-water-dashboard.yaml`
+
+          This is the current two-unit dashboard for the Bathroom & Laundry and Ensuite & Kitchen V2.2.7 controllers.
+
+          ## Frontend requirements
+
+          - **Mushroom Cards**
+          - **card-mod**
+          - Home Assistant built-in Sections layout, Tile cards, headings, grids and stacks
+
+          ## Local control
+
+          MQTT Discovery from V2.2.7 provides the verified local controls used by the dashboard:
+
+          - climate target temperature;
+          - operating mode;
+          - Vacation-date enable and return date;
+          - Timer 1 ON/OFF enables and times;
+          - Timer 2 ON/OFF enables and times;
+          - clock-sync status and last clock command.
+
+          The dashboard also exposes tank/heat-pump temperatures, compressor, booster, defrost, fans, valve/pump states, system health and disinfection diagnostics.
+
+          ## Controller clock
+
+          The old Aqua Temp `aqua_temp.sync_clock` service is no longer used.
+
+          Registers 1151–1156 are a **command/apply mailbox**, not a live readable clock. Consequently the dashboard shows the local firmware's **clock sync status** and **last clock command** rather than claiming to display the controller's continuously advancing time.
+
+          The firmware forces an NTP-derived clock command each Monday during the 01:00 local Melbourne time hour. The embedded controller page also offers `/clock-test` for a manual push.
+
+          ## Installing
+
+          1. Flash the appropriate V2.2.7 sketch.
+          2. Confirm the EVO270 device is online in MQTT/Home Assistant.
+          3. Install Mushroom Cards and card-mod.
+          4. Import `dashboard/hot-water-dashboard.yaml`.
+          5. Confirm all entities resolve before using schedule or temperature controls.
+
+          No Aqua Temp cloud/custom integration is required for these local controls.
+          EOF
+
+          cat > docs/MODBUS_PROTOCOL.md <<'EOF'
+          # EVO270 / HW211 Modbus notes
+
+          ## Transport
+
+          | Parameter | Value |
+          |---|---|
+          | Protocol | Modbus RTU |
+          | Baud | 9600 |
+          | Data | 8 |
+          | Parity | none |
+          | Stop bits | 1 |
+          | DTU/Wi-Fi slave | 99 |
+          | CRC | CRC-16/MODBUS, low byte first |
+
+          ## Functions used by V2.2.7
+
+          - **03** — holding-register reads and write verification
+          - **06** — allow-listed single-register control writes
+          - **16** — controller-clock mailbox block/apply sequence
+
+          The firmware is not a general Modbus write console. Writes are constrained to tested registers/ranges.
+
+          ## Data types
+
+          | Type | Decode |
+          |---|---|
+          | RAW | `x` |
+          | TEMP | signed `int16(x) * 0.1` °C |
+          | TEMP1 | `(x - 60) * 0.5` °C |
+          | DIGI2 | `x * 10` |
+          | DIGI4 | `x * 5` |
+          | DIGI7 | `x * 0.5` |
+
+          ## Known-good read
+
+          Ambient T01 is register 2019 decimal / `0x07E3`, TEMP1.
+
+          ```text
+          TX 63 03 07 E3 00 01 7C CA
+          RX 63 03 02 00 61 80 64
+          ```
+
+          Raw 97 decodes to 18.5 °C.
+
+          ## Verified write registers
+
+          See `data/core_registers.csv` for the current allow-list and read-only core/status registers.
+
+          The production write path checks the Modbus response and performs Function 03 readback where appropriate. Timer/date updates temporarily protect affected schedule-enable bits and restore them after successful field updates; rollback is attempted on failure.
+
+          ## Clock mailbox
+
+          The deployed controller accepts the following clock command map on slave 99:
+
+          | Register | Purpose |
+          |---:|---|
+          | 1151 | M11 clock modify/apply flag |
+          | 1152 | minute |
+          | 1153 | hour |
+          | 1154 | day |
+          | 1155 | month |
+          | 1156 | year (two digit) |
+
+          These registers do **not** provide a continuously advancing readable clock. They retain command/mailbox values. V2.2.7 therefore pushes NTP-derived time on schedule rather than calculating drift from those registers.
+
+          ## Legacy numbering
+
+          Aqua Temp entity names do not always line up one-for-one with newer HW211 protocol labels. The repository preserves useful legacy suffixes where practical. See `data/evo270_legacy_entity_map.csv`.
+          EOF
+
+          cat > docs/HOME_ASSISTANT_MQTT.md <<'EOF'
+          # Home Assistant / MQTT design
+
+          ## Goals
+
+          - local operation without the Aqua Temp cloud
+          - preserve useful EVO270/HW211 entity naming
+          - expose detailed monitoring
+          - expose only field-verified control writes
+          - retain browser/serial diagnostics
+
+          ## Discovery and identity
+
+          The current V2.2.7 deployment sketches use explicit per-unit identities so the local MQTT entities remain stable for the two migrated controllers. MQTT Discovery creates the climate, select, switch, time, date, status and diagnostic entities consumed by the current dashboard.
+
+          ## Verified command handling
+
+          Commands are accepted only for tested functions:
+
+          - power;
+          - requested operating mode;
+          - target temperature;
+          - Vacation enable/date;
+          - Timer 1 and Timer 2 enable/time fields.
+
+          The controller clock uses a dedicated mailbox/apply sequence rather than a normal live-clock entity.
+
+          Unknown or non-allow-listed controller parameters are not exposed as writable controls.
+
+          ## Polling
+
+          - dynamic state: approximately every 20 seconds
+          - slow/configuration state: approximately every 5 minutes
+
+          ## Clock state
+
+          Home Assistant receives:
+
+          - `sensor.<device_id>_clock_sync_status`
+          - `sensor.<device_id>_last_clock_command`
+
+          It intentionally does not expose a fake live controller clock or drift measurement because registers 1151–1156 are command/mailbox registers.
+
+          ## Dashboard
+
+          Use `home-assistant/dashboard/hot-water-dashboard.yaml`.
+          EOF
+
+          cat > docs/COMMISSIONING.md <<'EOF'
+          # Commissioning procedure
+
+          ## 1. Verify hardware
+
+          Confirm the Waveshare ESP32-S3-RS485-CAN wiring and the known-good bus parameters:
+
+          - GPIO17 TX
+          - GPIO18 RX
+          - GPIO21 direction/EN
+          - 9600 8N1
+          - slave 99
+
+          Historical single-register commissioning sketches remain under `firmware/commissioning/`.
+
+          ## 2. Prepare V2.2.7
+
+          Choose the matching folder under `firmware/current/`.
+
+          Copy:
+
+          `secrets.example.h` → `secrets.h`
+
+          Enter Wi-Fi, MQTT and optional OTA credentials locally. Never commit `secrets.h`.
+
+          In Arduino IDE use **ESP32S3 Dev Module**. The field-tested installation used Espressif's ESP32 Arduino core 3.3.11.
+
+          ## 3. Validate monitoring
+
+          After flashing, confirm:
+
+          - the embedded web page loads;
+          - `/diag` reports V2.2.7;
+          - Modbus responses are succeeding;
+          - T01/T02/T03/T10 are plausible;
+          - power, mode and status bits match the physical unit;
+          - MQTT Discovery entities are online in Home Assistant.
+
+          ## 4. Validate local controls
+
+          Confirm target temperature and operating mode only within the ranges already enforced by firmware. Confirm Timer/Vacation values through `/diag` and the Home Assistant entities.
+
+          ## 5. Validate clock
+
+          Open `/clock-test` and perform one manual NTP clock push. Confirm the physical controller clock changes to the expected local time and `/diag` reports a verified push.
+
+          Normal operation then uses the forced Monday 01:00 local NTP push.
+
+          ## OTA note
+
+          Arduino IDE network discovery can be unreliable even when the device's mDNS service is healthy. If required, export the compiled application `.ino.bin` and use Espressif's `espota.py` directly against the device IP on port 3232. Use your OTA password locally; never paste or commit it.
+          EOF
+
+          cat > docs/PROJECT_HISTORY.md <<'EOF'
+          # Project history
+
+          ## Phase 1 — protocol research
+
+          Community work from `sjtrny/esphome-hw211` and `echopin664/EVO270-1-HWS` established the HW211/EVO270 local RS485 path.
+
+          ## Phase 2 — ESPHome attempt
+
+          ESPHome 2026.8.1 on the Waveshare ESP32-S3-RS485-CAN repeatedly produced partial `FE` responses and Modbus timeouts on this installation.
+
+          ## Phase 3 — raw Arduino commissioning
+
+          Explicit GPIO21 direction control produced reliable Function 03 communication with the EVO270 on slave 99.
+
+          ## Phase 4 — OTA, browser diagnostics and MQTT
+
+          OTA, a browser monitor, MQTT and Home Assistant Discovery were added while retaining the proven RS485 transaction sequence.
+
+          ## Phase 5 — legacy entity/register mapping
+
+          Aqua Temp/HW211 entities were mapped to local registers/status bits. Fast and slow poll groups were introduced.
+
+          ## Phase 6 — V2.1.2 read-only deployment
+
+          Both units reached a stable read-only baseline with detailed telemetry and local Home Assistant entities.
+
+          ## Phase 7 — V2.2.1 verified writes
+
+          Narrowly scoped Function 06 write support was validated for power, requested operating mode and target temperature, with exact Function 03 readback. Vacation and Timer 1/2 registers were then verified with protected schedule-mask handling and rollback behavior.
+
+          ## Phase 8 — clock protocol investigation
+
+          Several diagnostic builds tested conflicting published HW211/DTU clock maps. Slave 1 did not respond to the candidate clock block. On slave 99, the sequence using 1152–1156 plus M11 at 1151 successfully changed the physical controller clock.
+
+          A later diagnostic proved those registers are a **command/apply mailbox**, not a continuously advancing clock, so drift cannot be calculated from them.
+
+          ## Phase 9 — V2.2.6 weekly forced NTP sync
+
+          The false live-clock/drift model was removed. Both ESP32s now push NTP-derived Melbourne time once each Monday during the 01:00 local hour, with bounded retry behavior after a failed attempt.
+
+          ## Phase 10 — V2.2.7 clock-test link and dashboard
+
+          The embedded landing page gained a direct **Manual clock test** button before **Clear browser log**.
+
+          The Home Assistant dashboard was consolidated around the validated local controls while retaining detailed heat-pump telemetry: timers, Vacation return date, temperatures, compressor/booster/defrost, fan/valve/pump state, system health, disinfection data and local clock-sync status.
+
+          ## Current release
+
+          `V2.2.7-clock-test-link` is the field-tested baseline for both installed EVO270-1 units.
+          EOF
+
+          cat > docs/REGISTER_MAP.md <<'EOF'
+          # Legacy entity / HW211 register map
+
+          The full historical monitoring mapping remains in `data/evo270_legacy_entity_map.csv`.
+
+          ## Frequently used monitoring registers
+
+          | Code | Register | Purpose | Decode |
+          |---|---:|---|---|
+          | R01 | 1104 | Target temperature | TEMP1 |
+          | T01 | 2019 | Ambient temperature | TEMP1 |
+          | T02 | 2020 | Bottom tank temperature | TEMP1 |
+          | T03 | 2021 | Top tank temperature | TEMP1 |
+          | T10 | 2025 | Display/app temperature | TEMP1 |
+          | O07 | 2060 | EEV current position | RAW |
+          | O08 | 2061 | Compressor accumulated run time | RAW |
+          | O09 | 2062 | Booster accumulated run time | RAW |
+
+          ## Verified local-control registers
+
+          | Register | Purpose |
+          |---:|---|
+          | 1011 | Power |
+          | 1012 | Requested mode |
+          | 1104 | Target temperature |
+          | 1129 | Vacation date enable |
+          | 1130 | Vacation year |
+          | 1131 | Vacation month |
+          | 1132 | Vacation day |
+          | 1133 | Timer enable mask |
+          | 1134–1137 | Timer 1 ON/OFF hour/minute |
+          | 1138–1141 | Timer 2 ON/OFF hour/minute |
+          | 1151 | Clock apply/modify flag |
+          | 1152–1156 | Clock minute/hour/day/month/year mailbox |
+
+          Timer-enable mask bits in register 1133:
+
+          - bit 0: Timer 1 ON
+          - bit 1: Timer 1 OFF
+          - bit 2: Timer 2 ON
+          - bit 3: Timer 2 OFF
+
+          The 1151–1156 clock fields are a command mailbox, not a live clock readback.
+
+          ## Status bitfields
+
+          Register 2050 contains S01–S06 input/status bits and O01–O11-style output states used by the legacy entity model. Register 2051 contains shutdown, DTU/Wi-Fi online, defrost and high-temperature hot-water stage flags.
+
+          See `data/status_bits.csv` for bit positions.
+          EOF
+
+          cat > data/core_registers.csv <<'EOF'
+          register,meaning,access_in_this_project,notes
+          1011,Power,verified-write,0=off 1=on
+          1012,Requested operation mode,verified-write,"0=Intelligent 2=Economic 3=Hybrid 4=High Demand 7=Vacation"
+          1013,Actual operation mode,read-only,Observed mode values 0/2/3/4/7
+          1046,Disinfection target temperature G01,read-only,TEMP1
+          1047,Disinfection duration G02,read-only,minutes
+          1048,Disinfection startup point G03,read-only,hour
+          1049,Disinfection cycle G04,read-only,days
+          1080-1090,Solar thermal N01-N11,read-only,"Solar-thermal pump/collector controls; not PV control"
+          1104,Target temperature R01,verified-write,"10-60 C in 0.5 C steps in V2.2.7"
+          1129,Vacation date enable L01,verified-write,bit0
+          1130,Vacation year,verified-write,two-digit year
+          1131,Vacation month,verified-write,1-12
+          1132,Vacation day,verified-write,calendar day
+          1133,Timer enable mask,verified-write,"bit0 T1 ON; bit1 T1 OFF; bit2 T2 ON; bit3 T2 OFF"
+          1134-1137,Timer 1 ON/OFF hour/minute,verified-write,protected multi-field update
+          1138-1141,Timer 2 ON/OFF hour/minute,verified-write,protected multi-field update
+          1151,Clock M11 apply flag,verified-command,apply after clock mailbox payload
+          1152-1156,Clock minute/hour/day/month/year,verified-command,"command mailbox; not live clock readback"
+          2019,Ambient temperature T01,read-only,Known-good commissioning register
+          2020,Bottom tank temperature T02,read-only,TEMP1
+          2021,Top tank temperature T03,read-only,TEMP1
+          2025,APP/display temperature T10,read-only,Used for HA climate current temperature
+          2050,Status0 bitfield,read-only,Outputs and switch states
+          2051,Status1 bitfield,read-only,Shutdown/DTU/defrost/high-temp flags
+          2085,Fault0 bitfield,read-only,Non-zero treated as fault active
+          EOF
+
+      - name: Remove staging helper and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .staging
+          rm -f .github/workflows/finalize-v227.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Release validated EVO270 V2.2.7 local control"
+          git push origin update-v2.2.7-firmware-dashboard
