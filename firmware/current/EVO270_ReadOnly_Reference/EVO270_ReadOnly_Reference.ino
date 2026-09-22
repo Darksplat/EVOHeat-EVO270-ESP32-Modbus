@@ -21,11 +21,12 @@
 #include <ArduinoOTA.h>
 #include <WebServer.h>
 #include <PubSubClient.h>
+#include <time.h>
 #include "secrets.h"
 #include "evo270_types.h"
 #include "device_profile.h"
 
-static const char *FW_VERSION = "2.1.2-reference-readonly";
+static const char *FW_VERSION = "2.2.0-clock-readback";
 static const uint8_t MODBUS_SLAVE = 99;
 static const int RS485_TX_PIN = 17;
 static const int RS485_RX_PIN = 18;
@@ -41,6 +42,34 @@ static const uint16_t REG_STATUS0 = 2050;
 static const uint16_t REG_STATUS1 = 2051;
 static const uint16_t REG_FAULT0 = 2085;
 
+//
+// Controller clock (DTU/Wi-Fi map, slave 99)
+//
+// Stage 1 intentionally READS these registers only. Once the field values are
+// confirmed against the physical EVO270 display, the next stage will enable a
+// narrowly allow-listed weekly clock correction.
+//
+// Production schedule requested for the write-enabled stage:
+// Monday 01:00 local Australian Eastern time (AEST/AEDT).
+//
+static const uint16_t REG_CLOCK_MODIFY_ENABLE = 1151; // M11
+static const uint16_t REG_CLOCK_MINUTE = 1152;        // M12
+static const uint16_t REG_CLOCK_HOUR = 1153;          // M13
+static const uint16_t REG_CLOCK_DAY = 1154;           // M14
+static const uint16_t REG_CLOCK_MONTH = 1155;         // M15
+static const uint16_t REG_CLOCK_YEAR = 1156;          // M16, 0-99 => 2000-2099
+
+static const uint32_t CLOCK_READ_INTERVAL_MS = 60000;
+static const uint8_t CLOCK_SYNC_WEEKDAY = 1; // struct tm: Sunday=0, Monday=1
+static const uint8_t CLOCK_SYNC_HOUR = 1;    // 01:00 local time
+
+// Australia/Melbourne DST rules: AEST UTC+10, AEDT UTC+11.
+// configTzTime() keeps the ESP32 aligned with local time automatically.
+static const char *LOCAL_TZ = "AEST-10AEDT,M10.1.0/2,M4.1.0/3";
+static const char *NTP_SERVER_1 = "au.pool.ntp.org";
+static const char *NTP_SERVER_2 = "time.google.com";
+static const char *NTP_SERVER_3 = "pool.ntp.org";
+
 HardwareSerial RS485(1);
 WebServer web(80);
 WiFiClient wifiClient;
@@ -52,6 +81,15 @@ uint32_t modbusFailureCount = 0;
 unsigned long lastFastPollMs = 0;
 unsigned long lastSlowPollMs = 0;
 unsigned long lastMqttAttemptMs = 0;
+unsigned long lastClockReadMs = 0;
+
+bool controllerClockValid = false;
+uint16_t controllerClockModifyEnable = 0;
+uint16_t controllerClockMinute = 0;
+uint16_t controllerClockHour = 0;
+uint16_t controllerClockDay = 0;
+uint16_t controllerClockMonth = 0;
+uint16_t controllerClockYear = 0;
 
 LegacyRegisterSensor directSensors[] = {
   {"usage_of_out_05_01", "Usage of OUT 05 [/01]", "/01", 1020, DecodeType::RAW, "", "", PollGroup::SLOW, true, false, false, 0},
@@ -240,6 +278,14 @@ String sensorStateTopic(const char *slug) { return baseTopic() + "/state/sensor/
 String discoveryTopic(const char *slug) {
   return "homeassistant/sensor/" + String(DEVICE_CODE) + "/" + slug + "/config";
 }
+String controllerClockStateTopic() { return baseTopic() + "/state/controller_clock"; }
+String controllerClockDiscoveryTopic() {
+  return "homeassistant/sensor/" + String(DEVICE_CODE) + "/controller_clock/config";
+}
+String clockSyncScheduleStateTopic() { return baseTopic() + "/state/clock_sync_schedule"; }
+String clockSyncScheduleDiscoveryTopic() {
+  return "homeassistant/sensor/" + String(DEVICE_CODE) + "/clock_sync_schedule/config";
+}
 
 String jsonEscape(String s) {
   s.replace("\\", "\\\\");
@@ -266,8 +312,43 @@ void publishSensorDiscovery(LegacyRegisterSensor &s) {
   mqtt.publish(discoveryTopic(s.slug).c_str(), p.c_str(), true);
 }
 
+void publishControllerClockDiscovery() {
+  String p = "{";
+  p += "\"name\":\"Controller Clock\",";
+  p += "\"unique_id\":\"" + String(DEVICE_CODE) + "_controller_clock\",";
+  p += "\"default_entity_id\":\"sensor." + String(DEVICE_CODE) + "_controller_clock\",";
+  p += "\"state_topic\":\"" + controllerClockStateTopic() + "\",";
+  p += "\"availability_topic\":\"" + availabilityTopic() + "\",";
+  p += "\"icon\":\"mdi:clock-digital\",";
+  p += "\"device\":{\"identifiers\":[\"evo270_" + String(DEVICE_CODE) + "\"],";
+  p += "\"name\":\"" + jsonEscape(String(DEVICE_NAME)) + "\",";
+  p += "\"manufacturer\":\"EvoHeat\",\"model\":\"EVO270-1 / HW211\",";
+  p += "\"sw_version\":\"" + String(FW_VERSION) + "\"}";
+  p += "}";
+  mqtt.publish(controllerClockDiscoveryTopic().c_str(), p.c_str(), true);
+}
+
+void publishClockSyncScheduleDiscovery() {
+  String p = "{";
+  p += "\"name\":\"Clock Sync Schedule\",";
+  p += "\"unique_id\":\"" + String(DEVICE_CODE) + "_clock_sync_schedule\",";
+  p += "\"default_entity_id\":\"sensor." + String(DEVICE_CODE) + "_clock_sync_schedule\",";
+  p += "\"state_topic\":\"" + clockSyncScheduleStateTopic() + "\",";
+  p += "\"availability_topic\":\"" + availabilityTopic() + "\",";
+  p += "\"icon\":\"mdi:calendar-clock\",";
+  p += "\"entity_category\":\"diagnostic\",";
+  p += "\"device\":{\"identifiers\":[\"evo270_" + String(DEVICE_CODE) + "\"],";
+  p += "\"name\":\"" + jsonEscape(String(DEVICE_NAME)) + "\",";
+  p += "\"manufacturer\":\"EvoHeat\",\"model\":\"EVO270-1 / HW211\",";
+  p += "\"sw_version\":\"" + String(FW_VERSION) + "\"}";
+  p += "}";
+  mqtt.publish(clockSyncScheduleDiscoveryTopic().c_str(), p.c_str(), true);
+}
+
 void publishAllDiscovery() {
   for (size_t i=0; i<DIRECT_SENSOR_COUNT; i++) publishSensorDiscovery(directSensors[i]);
+  publishControllerClockDiscovery();
+  publishClockSyncScheduleDiscovery();
 }
 
 void publishSensorState(LegacyRegisterSensor &s) {
@@ -302,6 +383,77 @@ bool readCore(uint16_t addr, RegisterValue &dest) {
   if (ok) { dest.raw=raw; dest.valid=true; }
   delay(12);
   return ok;
+}
+
+bool readClockRegister(uint16_t addr, uint16_t &dest) {
+  bool ok = readHoldingRegister(addr, dest);
+  delay(12);
+  return ok;
+}
+
+String controllerClockText() {
+  if (!controllerClockValid) return "unknown";
+  char buf[24];
+  snprintf(
+    buf, sizeof(buf),
+    "%04u-%02u-%02u %02u:%02u",
+    2000U + controllerClockYear,
+    controllerClockMonth,
+    controllerClockDay,
+    controllerClockHour,
+    controllerClockMinute
+  );
+  return String(buf);
+}
+
+void publishControllerClockState() {
+  if (!mqtt.connected()) return;
+  String state = controllerClockText();
+  mqtt.publish(controllerClockStateTopic().c_str(), state.c_str(), true);
+  mqtt.publish(
+    clockSyncScheduleStateTopic().c_str(),
+    "Monday 01:00 local (AEST/AEDT) - validation stage, writes disabled",
+    true
+  );
+}
+
+bool readControllerClock() {
+  uint16_t modifyEnable=0, minute=0, hour=0, day=0, month=0, year=0;
+
+  bool ok =
+    readClockRegister(REG_CLOCK_MODIFY_ENABLE, modifyEnable) &&
+    readClockRegister(REG_CLOCK_MINUTE, minute) &&
+    readClockRegister(REG_CLOCK_HOUR, hour) &&
+    readClockRegister(REG_CLOCK_DAY, day) &&
+    readClockRegister(REG_CLOCK_MONTH, month) &&
+    readClockRegister(REG_CLOCK_YEAR, year);
+
+  bool sane =
+    ok &&
+    modifyEnable <= 1 &&
+    minute <= 59 &&
+    hour <= 23 &&
+    day >= 1 && day <= 31 &&
+    month >= 1 && month <= 12 &&
+    year <= 99;
+
+  controllerClockValid = sane;
+  if (sane) {
+    controllerClockModifyEnable = modifyEnable;
+    controllerClockMinute = minute;
+    controllerClockHour = hour;
+    controllerClockDay = day;
+    controllerClockMonth = month;
+    controllerClockYear = year;
+  }
+
+  lastClockReadMs = millis();
+  publishControllerClockState();
+  return controllerClockValid;
+}
+
+void setupNtpClock() {
+  configTzTime(LOCAL_TZ, NTP_SERVER_1, NTP_SERVER_2, NTP_SERVER_3);
 }
 
 void pollFast() {
@@ -362,6 +514,9 @@ String webPage() {
   s+="<style>body{font-family:system-ui;margin:20px}table{border-collapse:collapse;width:100%}td,th{padding:6px;border-bottom:1px solid #ddd;text-align:left}code{font-size:.9em}</style></head><body>";
   s+="<h1>EVO270 read-only monitor</h1><p>"+String(DEVICE_NAME)+"</p>";
   s+="<p>Modbus OK: "+String(modbusSuccessCount)+" &nbsp; Fail: "+String(modbusFailureCount)+"</p>";
+  s+="<p><b>Controller clock:</b> "+controllerClockText()+"</p>";
+  s+="<p><b>Planned correction schedule:</b> Monday 01:00 local (AEST/AEDT). "
+     "This validation firmware is read-only; no clock writes are enabled yet.</p>";
   s+="<table><tr><th>Code</th><th>Register</th><th>Value</th><th>Entity</th></tr>";
   for (size_t i=0;i<DIRECT_SENSOR_COUNT;i++) {
     LegacyRegisterSensor &x=directSensors[i];
@@ -392,11 +547,13 @@ void setup() {
   rs485ReceiveMode();
   RS485.begin(MODBUS_BAUD, SERIAL_8N1, RS485_RX_PIN, RS485_TX_PIN);
   connectWiFi();
+  setupNtpClock();
   setupOTA();
   setupWeb();
   connectMqtt();
   pollFast();
   pollSlow();
+  readControllerClock();
 }
 
 void loop() {
@@ -408,5 +565,6 @@ void loop() {
 
   if (millis()-lastFastPollMs >= FAST_POLL_INTERVAL_MS) pollFast();
   if (millis()-lastSlowPollMs >= SLOW_POLL_INTERVAL_MS) pollSlow();
+  if (millis()-lastClockReadMs >= CLOCK_READ_INTERVAL_MS) readControllerClock();
   delay(2);
 }
