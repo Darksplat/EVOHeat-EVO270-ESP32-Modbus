@@ -1,17 +1,8 @@
 # Legacy entity / HW211 register map
 
-The authoritative full mapping is maintained in [`data/evo270_legacy_entity_map.csv`](../data/evo270_legacy_entity_map.csv).
+The full historical monitoring mapping remains in `data/evo270_legacy_entity_map.csv`.
 
-It contains all 83 legacy Aqua Temp-style entities captured during migration, including:
-
-- direct HW211 register mappings;
-- decode type (`RAW`, `TEMP1`, `DIGI2`, `DIGI4`, `DIGI7`);
-- fast vs slow polling tier;
-- status-bit mappings from registers 2050/2051;
-- legacy naming/numbering differences;
-- T11/T12 placeholders where no reliable local DTU/Wi-Fi mapping was found.
-
-## Frequently used registers
+## Frequently used monitoring registers
 
 | Code | Register | Purpose | Decode |
 |---|---:|---|---|
@@ -24,8 +15,34 @@ It contains all 83 legacy Aqua Temp-style entities captured during migration, in
 | O08 | 2061 | Compressor accumulated run time | RAW |
 | O09 | 2062 | Booster accumulated run time | RAW |
 
+## Verified local-control registers
+
+| Register | Purpose |
+|---:|---|
+| 1011 | Power |
+| 1012 | Requested mode |
+| 1104 | Target temperature |
+| 1129 | Vacation date enable |
+| 1130 | Vacation year |
+| 1131 | Vacation month |
+| 1132 | Vacation day |
+| 1133 | Timer enable mask |
+| 1134–1137 | Timer 1 ON/OFF hour/minute |
+| 1138–1141 | Timer 2 ON/OFF hour/minute |
+| 1151 | Clock apply/modify flag |
+| 1152–1156 | Clock minute/hour/day/month/year mailbox |
+
+Timer-enable mask bits in register 1133:
+
+- bit 0: Timer 1 ON
+- bit 1: Timer 1 OFF
+- bit 2: Timer 2 ON
+- bit 3: Timer 2 OFF
+
+The 1151–1156 clock fields are a command mailbox, not a live clock readback.
+
 ## Status bitfields
 
-Register `2050` contains the S01-S06 input/status bits and O01-O11-style output states used by the legacy entity model. Register `2051` contains shutdown, DTU/Wi-Fi online, defrost and high-temperature hot-water stage flags.
+Register 2050 contains S01–S06 input/status bits and O01–O11-style output states used by the legacy entity model. Register 2051 contains shutdown, DTU/Wi-Fi online, defrost and high-temperature hot-water stage flags.
 
-See [`data/status_bits.csv`](../data/status_bits.csv) for the exact bit positions.
+See `data/status_bits.csv` for bit positions.

@@ -1,0 +1,1472 @@
+title: Hot Water
+views:
+  - title: Hot Water
+    path: hot-water
+    icon: mdi:water-boiler
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Bathroom & Laundry
+            icon: mdi:shower
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: climate.34eae7b41fea
+                primary: >
+                  {{ state_attr('climate.34eae7b41fea', 'current_temperature') |
+                  float(0) | round(1) }} °C
+                secondary: >
+                  {% set action = state_attr('climate.34eae7b41fea',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae7b41fea_fault',
+                    'on'
+                  ) %}
+                    ⚠ FAULT
+
+                  {% elif is_state(
+                    'climate.34eae7b41fea',
+                    'off'
+                  ) %}
+                    ⏻ OFF
+
+                  {% elif
+                  states('sensor.34eae7b41fea_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15')
+                  | float(0) > 0 %}
+                    🔴 DISINFECTION / HIGH TEMP
+
+                  {% elif action == 'heating' %}
+                    🔥 HEATING
+
+                  {% else %}
+                    ✓ READY
+                  {% endif %}
+                icon: >
+                  {% set action = state_attr('climate.34eae7b41fea',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae7b41fea_fault',
+                    'on'
+                  ) %}
+                    mdi:alert-circle
+
+                  {% elif is_state(
+                    'climate.34eae7b41fea',
+                    'off'
+                  ) %}
+                    mdi:water-boiler-off
+
+                  {% elif action == 'heating' %}
+                    mdi:water-boiler
+
+                  {% else %}
+                    mdi:check-circle
+                  {% endif %}
+                icon_color: >
+                  {% set action = state_attr('climate.34eae7b41fea',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae7b41fea_fault',
+                    'on'
+                  ) %}
+                    red
+
+                  {% elif is_state(
+                    'climate.34eae7b41fea',
+                    'off'
+                  ) %}
+                    grey
+
+                  {% elif action == 'heating' %}
+                    orange
+
+                  {% else %}
+                    green
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 250px;
+                      border-radius: 30px;
+                    }
+
+                    mushroom-shape-icon {
+                      --icon-size: 90px;
+                    }
+
+                    mushroom-state-info {
+                      text-align: center;
+                    }
+
+                    .primary {
+                      font-size: 32px !important;
+                      font-weight: 700 !important;
+                    }
+
+                    .secondary {
+                      font-size: 17px !important;
+                      font-weight: 600 !important;
+                      margin-top: 8px !important;
+                    }
+              - type: vertical-stack
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: climate.34eae7b41fea
+                    primary: Target
+                    secondary: |
+                      {{ state_attr(
+                        'climate.34eae7b41fea',
+                        'temperature'
+                      ) | float(0) | round(1) }} °C
+                    icon: mdi:thermometer-check
+                    icon_color: orange
+                    tap_action:
+                      action: more-info
+                    card_mod:
+                      style: |
+                        ha-card {
+                          height: 85px;
+                          border-radius: 22px;
+                        }
+
+                        .primary {
+                          font-weight: 600 !important;
+                        }
+
+                        .secondary {
+                          font-size: 17px !important;
+                          font-weight: 600 !important;
+                        }
+                  - type: tile
+                    entity: >-
+                      select.backyard_evo270_bathroom_laundry_34eae7b41fea_34eae7b41fea_operating_mode
+                    name: Operating Mode
+                    icon: mdi:cog
+                    vertical: false
+                    features:
+                      - type: select-options
+                    card_mod:
+                      style: |
+                        ha-card {
+                          min-height: 155px;
+                          border-radius: 22px;
+                        }
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_top_temperature_t03
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Top
+                icon: mdi:thermometer-chevron-up
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_bottom_temperature_t02
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Bottom
+                icon: mdi:thermometer-chevron-down
+                icon_color: orange
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_ambient_temperature_t01
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Ambient
+                icon: mdi:home-thermometer-outline
+                icon_color: blue
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_api_status
+                primary: API
+                secondary: |
+                  {% if is_state(entity, 'on') %}
+                    Online
+                  {% else %}
+                    Offline
+                  {% endif %}
+                icon: |
+                  {% if is_state(entity, 'on') %}
+                    mdi:cloud-check
+                  {% else %}
+                    mdi:cloud-alert
+                  {% endif %}
+                icon_color: |
+                  {% if is_state(entity, 'on') %}
+                    green
+                  {% else %}
+                    red
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_fault
+                primary: System
+                secondary: |
+                  {% if is_state(entity, 'on') %}
+                    FAULT
+                  {% else %}
+                    Normal
+                  {% endif %}
+                icon: |
+                  {% if is_state(entity, 'on') %}
+                    mdi:alert-circle
+                  {% else %}
+                    mdi:check-circle
+                  {% endif %}
+                icon_color: |
+                  {% if is_state(entity, 'on') %}
+                    red
+                  {% else %}
+                    green
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 130px;
+                      border-radius: 25px;
+                    }
+          - type: heading
+            heading: Schedule & Vacation
+            icon: mdi:calendar-clock
+          - type: heading
+            heading: Timer 1
+            icon: mdi:timer-outline
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae7b41fea_timer_1_on_enabled
+                name: ON Enabled
+                icon: mdi:timer-play-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae7b41fea_timer_1_on
+                name: ON Time
+                icon: mdi:clock-start
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: switch.34eae7b41fea_timer_1_off_enabled
+                name: OFF Enabled
+                icon: mdi:timer-stop-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae7b41fea_timer_1_off
+                name: OFF Time
+                icon: mdi:clock-end
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: heading
+            heading: Timer 2
+            icon: mdi:timer-outline
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae7b41fea_timer_2_on_enabled
+                name: ON Enabled
+                icon: mdi:timer-play-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae7b41fea_timer_2_on
+                name: ON Time
+                icon: mdi:clock-start
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: switch.34eae7b41fea_timer_2_off_enabled
+                name: OFF Enabled
+                icon: mdi:timer-stop-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae7b41fea_timer_2_off
+                name: OFF Time
+                icon: mdi:clock-end
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae7b41fea_vacation_date_enabled
+                name: Vacation Return
+                icon: mdi:airplane-clock
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: date.34eae7b41fea_vacation_date
+                name: Return Date
+                icon: mdi:calendar-check
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: heading
+            heading: Heat Pump Temperatures
+            icon: mdi:thermometer-lines
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_coil_temperature_t04
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Coil
+                icon: mdi:snowflake-thermometer
+                icon_color: cyan
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_suction_temperature_t05
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Suction
+                icon: mdi:thermometer-water
+                icon_color: teal
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_solar_temperature_t06
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Solar / Aux
+                icon: mdi:white-balance-sunny
+                icon_color: amber
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_temperature_value_shown_on_app_display_t10
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Controller Display
+                icon: mdi:monitor-dashboard
+                icon_color: purple
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+          - type: heading
+            heading: Live Operation
+            icon: mdi:engine
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_compressor_o01
+                primary: Compressor
+                secondary: >
+                  {{ 'RUNNING' if states(entity) | float(0) > 0 else 'Stopped'
+                  }}
+                icon: mdi:heat-pump
+                icon_color: |
+                  {{ 'red' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_electrical_heater_o02
+                primary: Electric Booster
+                secondary: |
+                  {{ 'ACTIVE' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:radiator
+                icon_color: >
+                  {{ 'deep-orange' if states(entity) | float(0) > 0 else 'grey'
+                  }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_chu_shuang_defrost_o14
+                primary: Defrost
+                secondary: |
+                  {{ 'ACTIVE' if states(entity) | float(0) > 0 else 'Idle' }}
+                icon: mdi:snowflake-melt
+                icon_color: |
+                  {{ 'blue' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: >-
+                  sensor.34eae7b41fea_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15
+                primary: Disinfection
+                secondary: >
+                  {{ 'HIGH-TEMP ACTIVE' if states(entity) | float(0) > 0 else
+                  'Idle' }}
+                icon: mdi:shield-sun
+                icon_color: |
+                  {{ 'red' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                      {% if states('sensor.34eae7b41fea_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15') | float(0) > 0 %}
+                      border: 2px solid var(--error-color);
+                      box-shadow: 0 0 18px rgba(244, 67, 54, 0.65);
+                      {% endif %}
+                    }
+          - type: heading
+            heading: Fans, Valve & Pump
+            icon: mdi:fan
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_fan_high_speed_o04
+                primary: Fan High
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:fan-speed-3
+                icon_color: |
+                  {{ 'cyan' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_fan_low_speed_o05
+                primary: Fan Low
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:fan-speed-1
+                icon_color: |
+                  {{ 'cyan' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_4_way_valve_o03
+                primary: 4-Way Valve
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:valve
+                icon_color: |
+                  {{ 'blue' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_reserve_solar_pump_solar_valve_pump_o06
+                primary: Pump / Solar Valve
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:pump
+                icon_color: |
+                  {{ 'amber' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+          - type: heading
+            heading: System Health
+            icon: mdi:heart-pulse
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_api_status
+                primary: MQTT / API
+                secondary: |
+                  {{ 'Online' if is_state(entity, 'on') else 'Offline' }}
+                icon: mdi:lan-connect
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'red' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_status
+                primary: Modbus
+                secondary: |
+                  {{ 'Online' if is_state(entity, 'on') else 'Offline' }}
+                icon: mdi:serial-port
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'red' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_power
+                primary: Power
+                secondary: |
+                  {{ 'ON' if is_state(entity, 'on') else 'OFF' }}
+                icon: mdi:power
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae7b41fea_fault
+                primary: Fault
+                secondary: |
+                  {{ 'FAULT' if is_state(entity, 'on') else 'Normal' }}
+                icon: >
+                  {{ 'mdi:alert-circle' if is_state(entity, 'on') else
+                  'mdi:check-circle' }}
+                icon_color: |
+                  {{ 'red' if is_state(entity, 'on') else 'green' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+          - type: heading
+            heading: Disinfection Settings
+            icon: mdi:shield-check
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.34eae7b41fea_disinfection_target_temp_g01
+                name: Target
+                icon: mdi:thermometer-alert
+                vertical: true
+              - type: tile
+                entity: sensor.34eae7b41fea_duration_of_disinfection_g02
+                name: Duration
+                icon: mdi:timer-sand
+                vertical: true
+              - type: tile
+                entity: sensor.34eae7b41fea_startup_point_of_disinfection_g03
+                name: Start Hour
+                icon: mdi:clock-start
+                vertical: true
+              - type: tile
+                entity: sensor.34eae7b41fea_circle_of_disinfection_g04
+                name: Cycle
+                icon: mdi:calendar-sync
+                vertical: true
+      - type: grid
+        cards:
+          - type: heading
+            heading: Ensuite & Kitchen
+            icon: mdi:silverware-fork-knife
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: climate.34eae79f4bce
+                primary: >
+                  {{ state_attr('climate.34eae79f4bce', 'current_temperature') |
+                  float(0) | round(1) }} °C
+                secondary: >
+                  {% set action = state_attr('climate.34eae79f4bce',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae79f4bce_fault',
+                    'on'
+                  ) %}
+                    ⚠ FAULT
+
+                  {% elif is_state(
+                    'climate.34eae79f4bce',
+                    'off'
+                  ) %}
+                    ⏻ OFF
+
+                  {% elif
+                  states('sensor.34eae79f4bce_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15')
+                  | float(0) > 0 %}
+                    🔴 DISINFECTION / HIGH TEMP
+
+                  {% elif action == 'heating' %}
+                    🔥 HEATING
+
+                  {% else %}
+                    ✓ READY
+                  {% endif %}
+                icon: >
+                  {% set action = state_attr('climate.34eae79f4bce',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae79f4bce_fault',
+                    'on'
+                  ) %}
+                    mdi:alert-circle
+
+                  {% elif is_state(
+                    'climate.34eae79f4bce',
+                    'off'
+                  ) %}
+                    mdi:water-boiler-off
+
+                  {% elif action == 'heating' %}
+                    mdi:water-boiler
+
+                  {% else %}
+                    mdi:check-circle
+                  {% endif %}
+                icon_color: >
+                  {% set action = state_attr('climate.34eae79f4bce',
+                  'hvac_action') %}
+
+                  {% if is_state(
+                    'binary_sensor.34eae79f4bce_fault',
+                    'on'
+                  ) %}
+                    red
+
+                  {% elif is_state(
+                    'climate.34eae79f4bce',
+                    'off'
+                  ) %}
+                    grey
+
+                  {% elif action == 'heating' %}
+                    orange
+
+                  {% else %}
+                    green
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 250px;
+                      border-radius: 30px;
+                    }
+
+                    mushroom-shape-icon {
+                      --icon-size: 90px;
+                    }
+
+                    mushroom-state-info {
+                      text-align: center;
+                    }
+
+                    .primary {
+                      font-size: 32px !important;
+                      font-weight: 700 !important;
+                    }
+
+                    .secondary {
+                      font-size: 17px !important;
+                      font-weight: 600 !important;
+                      margin-top: 8px !important;
+                    }
+              - type: vertical-stack
+                cards:
+                  - type: custom:mushroom-template-card
+                    entity: climate.34eae79f4bce
+                    primary: Target
+                    secondary: |
+                      {{ state_attr(
+                        'climate.34eae79f4bce',
+                        'temperature'
+                      ) | float(0) | round(1) }} °C
+                    icon: mdi:thermometer-check
+                    icon_color: orange
+                    tap_action:
+                      action: more-info
+                    card_mod:
+                      style: |
+                        ha-card {
+                          height: 85px;
+                          border-radius: 22px;
+                        }
+
+                        .primary {
+                          font-weight: 600 !important;
+                        }
+
+                        .secondary {
+                          font-size: 17px !important;
+                          font-weight: 600 !important;
+                        }
+                  - type: tile
+                    entity: >-
+                      select.back_fence_garden_evo270_ensuite_kitchen_34eae79f4bce_34eae79f4bce_operating_mode
+                    name: Operating Mode
+                    icon: mdi:cog
+                    vertical: false
+                    features:
+                      - type: select-options
+                    card_mod:
+                      style: |
+                        ha-card {
+                          min-height: 155px;
+                          border-radius: 22px;
+                        }
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_top_temperature_t03
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Top
+                icon: mdi:thermometer-chevron-up
+                icon_color: red
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_bottom_temperature_t02
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Bottom
+                icon: mdi:thermometer-chevron-down
+                icon_color: orange
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_ambient_temperature_t01
+                primary: |
+                  {{ states(entity) | float(0) | round(1) }} °C
+                secondary: Ambient
+                icon: mdi:home-thermometer-outline
+                icon_color: blue
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 140px;
+                      border-radius: 25px;
+                    }
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_api_status
+                primary: API
+                secondary: |
+                  {% if is_state(entity, 'on') %}
+                    Online
+                  {% else %}
+                    Offline
+                  {% endif %}
+                icon: |
+                  {% if is_state(entity, 'on') %}
+                    mdi:cloud-check
+                  {% else %}
+                    mdi:cloud-alert
+                  {% endif %}
+                icon_color: |
+                  {% if is_state(entity, 'on') %}
+                    green
+                  {% else %}
+                    red
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_fault
+                primary: System
+                secondary: |
+                  {% if is_state(entity, 'on') %}
+                    FAULT
+                  {% else %}
+                    Normal
+                  {% endif %}
+                icon: |
+                  {% if is_state(entity, 'on') %}
+                    mdi:alert-circle
+                  {% else %}
+                    mdi:check-circle
+                  {% endif %}
+                icon_color: |
+                  {% if is_state(entity, 'on') %}
+                    red
+                  {% else %}
+                    green
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      height: 130px;
+                      border-radius: 25px;
+                    }
+          - type: heading
+            heading: Schedule & Vacation
+            icon: mdi:calendar-clock
+          - type: heading
+            heading: Timer 1
+            icon: mdi:timer-outline
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae79f4bce_timer_1_on_enabled
+                name: ON Enabled
+                icon: mdi:timer-play-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae79f4bce_timer_1_on
+                name: ON Time
+                icon: mdi:clock-start
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: switch.34eae79f4bce_timer_1_off_enabled
+                name: OFF Enabled
+                icon: mdi:timer-stop-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae79f4bce_timer_1_off
+                name: OFF Time
+                icon: mdi:clock-end
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: heading
+            heading: Timer 2
+            icon: mdi:timer-outline
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae79f4bce_timer_2_on_enabled
+                name: ON Enabled
+                icon: mdi:timer-play-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae79f4bce_timer_2_on
+                name: ON Time
+                icon: mdi:clock-start
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: switch.34eae79f4bce_timer_2_off_enabled
+                name: OFF Enabled
+                icon: mdi:timer-stop-outline
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: time.34eae79f4bce_timer_2_off
+                name: OFF Time
+                icon: mdi:clock-end
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: switch.34eae79f4bce_vacation_date_enabled
+                name: Vacation Return
+                icon: mdi:airplane-clock
+                features:
+                  - type: toggle
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+              - type: tile
+                entity: date.34eae79f4bce_vacation_date
+                name: Return Date
+                icon: mdi:calendar-check
+                card_mod:
+                  style: |
+                    ha-card {
+                      border-radius: 22px;
+                    }
+          - type: heading
+            heading: Heat Pump Temperatures
+            icon: mdi:thermometer-lines
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_coil_temperature_t04
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Coil
+                icon: mdi:snowflake-thermometer
+                icon_color: cyan
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_suction_temperature_t05
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Suction
+                icon: mdi:thermometer-water
+                icon_color: teal
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_solar_temperature_t06
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Solar / Aux
+                icon: mdi:white-balance-sunny
+                icon_color: amber
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_temperature_value_shown_on_app_display_t10
+                primary: '{{ states(entity) | float(0) | round(1) }} °C'
+                secondary: Controller Display
+                icon: mdi:monitor-dashboard
+                icon_color: purple
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 120px;
+                      border-radius: 24px;
+                    }
+          - type: heading
+            heading: Live Operation
+            icon: mdi:engine
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_compressor_o01
+                primary: Compressor
+                secondary: >
+                  {{ 'RUNNING' if states(entity) | float(0) > 0 else 'Stopped'
+                  }}
+                icon: mdi:heat-pump
+                icon_color: |
+                  {{ 'red' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_electrical_heater_o02
+                primary: Electric Booster
+                secondary: |
+                  {{ 'ACTIVE' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:radiator
+                icon_color: >
+                  {{ 'deep-orange' if states(entity) | float(0) > 0 else 'grey'
+                  }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_chu_shuang_defrost_o14
+                primary: Defrost
+                secondary: |
+                  {{ 'ACTIVE' if states(entity) | float(0) > 0 else 'Idle' }}
+                icon: mdi:snowflake-melt
+                icon_color: |
+                  {{ 'blue' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                    }
+              - type: custom:mushroom-template-card
+                entity: >-
+                  sensor.34eae79f4bce_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15
+                primary: Disinfection
+                secondary: >
+                  {{ 'HIGH-TEMP ACTIVE' if states(entity) | float(0) > 0 else
+                  'Idle' }}
+                icon: mdi:shield-sun
+                icon_color: |
+                  {{ 'red' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 130px;
+                      border-radius: 25px;
+                      {% if states('sensor.34eae79f4bce_xi_tong_shi_fou_jin_ru_gao_wen_re_shui_jie_duan_o15') | float(0) > 0 %}
+                      border: 2px solid var(--error-color);
+                      box-shadow: 0 0 18px rgba(244, 67, 54, 0.65);
+                      {% endif %}
+                    }
+          - type: heading
+            heading: Fans, Valve & Pump
+            icon: mdi:fan
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_fan_high_speed_o04
+                primary: Fan High
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:fan-speed-3
+                icon_color: |
+                  {{ 'cyan' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_fan_low_speed_o05
+                primary: Fan Low
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:fan-speed-1
+                icon_color: |
+                  {{ 'cyan' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_4_way_valve_o03
+                primary: 4-Way Valve
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:valve
+                icon_color: |
+                  {{ 'blue' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_reserve_solar_pump_solar_valve_pump_o06
+                primary: Pump / Solar Valve
+                secondary: |
+                  {{ 'ON' if states(entity) | float(0) > 0 else 'Off' }}
+                icon: mdi:pump
+                icon_color: |
+                  {{ 'amber' if states(entity) | float(0) > 0 else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+          - type: heading
+            heading: System Health
+            icon: mdi:heart-pulse
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_api_status
+                primary: MQTT / API
+                secondary: |
+                  {{ 'Online' if is_state(entity, 'on') else 'Offline' }}
+                icon: mdi:lan-connect
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'red' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_status
+                primary: Modbus
+                secondary: |
+                  {{ 'Online' if is_state(entity, 'on') else 'Offline' }}
+                icon: mdi:serial-port
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'red' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_power
+                primary: Power
+                secondary: |
+                  {{ 'ON' if is_state(entity, 'on') else 'OFF' }}
+                icon: mdi:power
+                icon_color: |
+                  {{ 'green' if is_state(entity, 'on') else 'grey' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+              - type: custom:mushroom-template-card
+                entity: binary_sensor.34eae79f4bce_fault
+                primary: Fault
+                secondary: |
+                  {{ 'FAULT' if is_state(entity, 'on') else 'Normal' }}
+                icon: >
+                  {{ 'mdi:alert-circle' if is_state(entity, 'on') else
+                  'mdi:check-circle' }}
+                icon_color: |
+                  {{ 'red' if is_state(entity, 'on') else 'green' }}
+                layout: vertical
+                tap_action:
+                  action: more-info
+          - type: heading
+            heading: Disinfection Settings
+            icon: mdi:shield-check
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+              - type: tile
+                entity: sensor.34eae79f4bce_disinfection_target_temp_g01
+                name: Target
+                icon: mdi:thermometer-alert
+                vertical: true
+              - type: tile
+                entity: sensor.34eae79f4bce_duration_of_disinfection_g02
+                name: Duration
+                icon: mdi:timer-sand
+                vertical: true
+              - type: tile
+                entity: sensor.34eae79f4bce_startup_point_of_disinfection_g03
+                name: Start Hour
+                icon: mdi:clock-start
+                vertical: true
+              - type: tile
+                entity: sensor.34eae79f4bce_circle_of_disinfection_g04
+                name: Cycle
+                icon: mdi:calendar-sync
+                vertical: true
+      - type: grid
+        cards:
+          - type: heading
+            heading: Clock Sync
+            icon: mdi:clock-check-outline
+          - type: custom:mushroom-template-card
+            primary: Home Assistant Time
+            secondary: |
+              {{ now().strftime('%A %d %B %Y • %H:%M:%S') }}
+            icon: mdi:home-clock
+            icon_color: blue
+            tap_action:
+              action: none
+            card_mod:
+              style: |
+                ha-card {
+                  border-radius: 25px;
+                }
+          - type: horizontal-stack
+            cards:
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae7b41fea_clock_sync_status
+                primary: Bathroom & Laundry
+                secondary: >
+                  {% set status =
+                  states('sensor.34eae7b41fea_clock_sync_status') %} {% set last
+                  = states('sensor.34eae7b41fea_last_clock_command') %} {{
+                  status }} {% if last not in ['unknown', 'unavailable', '',
+                  'Never'] %}
+                    • Last push: {{ last }}
+                  {% endif %}
+                icon: mdi:clock-sync
+                icon_color: >
+                  {% if 'FAILED' in
+                  states('sensor.34eae7b41fea_clock_sync_status') %}
+                    red
+                  {% elif 'verified' in
+                  states('sensor.34eae7b41fea_clock_sync_status') | lower %}
+                    green
+                  {% else %}
+                    blue
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 180px;
+                      border-radius: 25px;
+                    }
+
+                    mushroom-shape-icon {
+                      --icon-size: 64px;
+                    }
+
+                    mushroom-state-info {
+                      text-align: center;
+                    }
+
+                    .primary {
+                      font-size: 20px !important;
+                      font-weight: 700 !important;
+                    }
+
+                    .secondary {
+                      font-size: 15px !important;
+                      font-weight: 600 !important;
+                      margin-top: 8px !important;
+                    }
+              - type: custom:mushroom-template-card
+                entity: sensor.34eae79f4bce_clock_sync_status
+                primary: Ensuite & Kitchen
+                secondary: >
+                  {% set status =
+                  states('sensor.34eae79f4bce_clock_sync_status') %} {% set last
+                  = states('sensor.34eae79f4bce_last_clock_command') %} {{
+                  status }} {% if last not in ['unknown', 'unavailable', '',
+                  'Never'] %}
+                    • Last push: {{ last }}
+                  {% endif %}
+                icon: mdi:clock-sync
+                icon_color: >
+                  {% if 'FAILED' in
+                  states('sensor.34eae79f4bce_clock_sync_status') %}
+                    red
+                  {% elif 'verified' in
+                  states('sensor.34eae79f4bce_clock_sync_status') | lower %}
+                    green
+                  {% else %}
+                    blue
+                  {% endif %}
+                layout: vertical
+                tap_action:
+                  action: none
+                card_mod:
+                  style: |
+                    ha-card {
+                      min-height: 180px;
+                      border-radius: 25px;
+                    }
+
+                    mushroom-shape-icon {
+                      --icon-size: 64px;
+                    }
+
+                    mushroom-state-info {
+                      text-align: center;
+                    }
+
+                    .primary {
+                      font-size: 20px !important;
+                      font-weight: 700 !important;
+                    }
+
+                    .secondary {
+                      font-size: 15px !important;
+                      font-weight: 600 !important;
+                      margin-top: 8px !important;
+                    }

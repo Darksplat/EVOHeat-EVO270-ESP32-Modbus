@@ -1,25 +1,35 @@
 # Current firmware
 
-`EVO270_ReadOnly_Reference/` is a consolidated public-safe reference implementation that captures the proven V2.1.2 architecture.
+The current field-tested release is **V2.2.7-clock-test-link**.
 
-It is intentionally labelled **reference** because the two locally-installed V2.1.2 sketches evolved through several commissioning edits and this repository package does not claim a byte-for-byte export of those private local files.
+Exact deployed sketches:
 
-The important field-proven behaviour is retained:
+- `EVO270_Laundry_Bathroom_V2_2_7_ClockTestLink/`
+- `EVO270_Ensuite_Kitchen_V2_2_7_ClockTestLink/`
 
-- GPIO17 TX
-- GPIO18 RX
-- GPIO21 explicit RS485 direction
-- 9600 8N1
-- slave 99
-- Function 03 reads only
-- TEMP1/DIGI decoding
-- fast/slow polling
-- OTA
+Each sketch folder contains:
+
+- the matching `.ino`;
+- `evo270_types.h`;
+- `secrets.example.h`.
+
+Copy `secrets.example.h` to `secrets.h` locally. The real `secrets.h` is ignored by git and must not be committed.
+
+## Field-proven behavior
+
+- Waveshare ESP32-S3-RS485-CAN
+- GPIO17 TX / GPIO18 RX / GPIO21 RS485 direction
+- 9600 8N1, Modbus slave 99
+- Function 03 monitoring
+- narrowly allow-listed Function 06 controls
+- Function 03 exact readback validation after normal writes
+- protected Vacation/Timer 1/Timer 2 writes
+- controller clock command through the 1151–1156 mailbox
+- NTP with Melbourne/Victoria DST rules
+- forced Monday 01:00 local clock push
+- manual `/clock-test`
+- OTA on port 3232
 - browser diagnostics
-- MQTT
-- Home Assistant Discovery
-- automatic identity from the Waveshare ESP32 Wi-Fi MAC
+- MQTT Discovery for Home Assistant
 
-The public firmware does **not** require or reuse the removed Aqua Temp Wi-Fi module's MAC/device code. Each Waveshare derives its own 12-digit device ID at runtime and uses that for its MQTT namespace and Home Assistant unique IDs.
-
-For exact development filenames and history see `../../docs/PROJECT_HISTORY.md`.
+The old V2.1.2 read-only reference implementation was removed from `firmware/current/` when V2.2.7 became the validated deployment baseline. Historical commissioning/testbench material remains elsewhere in the repository because it is still useful for troubleshooting.
